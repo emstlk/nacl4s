@@ -1,0 +1,17 @@
+.*
+
+# Java class files
+*.class
+
+# generated files
+bin/
+gen/
+target/
+
+# sbt-launch
+sbt-launch.jar
+
+# Intellij project files
+*.iml
+*.ipr
+*.iws
