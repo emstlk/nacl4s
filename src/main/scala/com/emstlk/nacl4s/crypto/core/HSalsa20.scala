@@ -1,6 +1,7 @@
 package com.emstlk.nacl4s.crypto.core
 
 import com.emstlk.nacl4s.crypto.Utils._
+import com.emstlk.nacl4s.crypto.core.Salsa20.rotate
 
 object HSalsa20 {
 
@@ -14,22 +15,22 @@ object HSalsa20 {
                  k: Array[Byte],
                  c: Array[Byte]): Int = {
 
-    var x0 = loadLittleEndian(c, 0)
-    var x1 = loadLittleEndian(k, 0)
-    var x2 = loadLittleEndian(k, 4)
-    var x3 = loadLittleEndian(k, 8)
-    var x4 = loadLittleEndian(k, 12)
-    var x5 = loadLittleEndian(c, 4)
-    var x6 = loadLittleEndian(in, 0)
-    var x7 = loadLittleEndian(in, 4)
-    var x8 = loadLittleEndian(in, 8)
-    var x9 = loadLittleEndian(in, 12)
-    var x10 = loadLittleEndian(c, 8)
-    var x11 = loadLittleEndian(k, 16)
-    var x12 = loadLittleEndian(k, 20)
-    var x13 = loadLittleEndian(k, 24)
-    var x14 = loadLittleEndian(k, 28)
-    var x15 = loadLittleEndian(c, 12)
+    var x0 = loadInt(c, 0)
+    var x1 = loadInt(k, 0)
+    var x2 = loadInt(k, 4)
+    var x3 = loadInt(k, 8)
+    var x4 = loadInt(k, 12)
+    var x5 = loadInt(c, 4)
+    var x6 = loadInt(in, 0)
+    var x7 = loadInt(in, 4)
+    var x8 = loadInt(in, 8)
+    var x9 = loadInt(in, 12)
+    var x10 = loadInt(c, 8)
+    var x11 = loadInt(k, 16)
+    var x12 = loadInt(k, 20)
+    var x13 = loadInt(k, 24)
+    var x14 = loadInt(k, 28)
+    var x15 = loadInt(c, 12)
 
     for (i <- 20 until 0 by -2) {
       x4 ^= rotate(x0 + x12, 7)
@@ -66,14 +67,14 @@ object HSalsa20 {
       x15 ^= rotate(x14 + x13, 18)
     }
 
-    saveLittleEndian(out, 0, x0)
-    saveLittleEndian(out, 4, x5)
-    saveLittleEndian(out, 8, x10)
-    saveLittleEndian(out, 12, x15)
-    saveLittleEndian(out, 16, x6)
-    saveLittleEndian(out, 20, x7)
-    saveLittleEndian(out, 24, x8)
-    saveLittleEndian(out, 28, x9)
+    storeInt(out, 0, x0)
+    storeInt(out, 4, x5)
+    storeInt(out, 8, x10)
+    storeInt(out, 12, x15)
+    storeInt(out, 16, x6)
+    storeInt(out, 20, x7)
+    storeInt(out, 24, x8)
+    storeInt(out, 28, x9)
 
     0 //TODO
   }

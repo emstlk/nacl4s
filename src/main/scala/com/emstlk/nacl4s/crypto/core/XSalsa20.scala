@@ -13,7 +13,7 @@ object XSalsa20 {
                    k: Array[Byte]): Int = {
 
     val subkey = new Array[Byte](32)
-    HSalsa20.cryptoCore(subkey, n, k, sigma)
+    HSalsa20.cryptoCore(subkey, n, k, getSigma)
     Salsa20.cryptoStream(c, clen, n, 16, subkey)
   }
 
@@ -24,7 +24,7 @@ object XSalsa20 {
                       k: Array[Byte]): Int = {
 
     val subkey = new Array[Byte](32)
-    HSalsa20.cryptoCore(subkey, n, k, sigma)
+    HSalsa20.cryptoCore(subkey, n, k, getSigma)
     Salsa20.cryptoStreamXor(c, m, mlen, n, 16, subkey)
   }
 

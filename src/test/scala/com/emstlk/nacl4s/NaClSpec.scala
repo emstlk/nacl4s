@@ -16,8 +16,8 @@ class NaClSpec extends FunSpec with Matchers {
     val arr = new Array[Byte](4)
     val number = Int.MaxValue
 
-    Utils.saveLittleEndian(arr, 0, number)
-    val loadedNumber = Utils.loadLittleEndian(arr, 0)
+    Utils.storeInt(arr, 0, number)
+    val loadedNumber = Utils.loadInt(arr, 0)
 
     loadedNumber shouldBe number
   }
@@ -59,50 +59,46 @@ class NaClSpec extends FunSpec with Matchers {
 
     it("first case") {
       val alicesk = fromHex("77076d0a7318a57d3c16c17251b26645df4c2f87ebc0992ab177fba51db92c2a")
-      val alicepk = new Array[Byte](32)
-      crypto_scalarmult_base(alicepk, alicesk)
+      val alicepk = new Array[Byte](scalarmultBytes)
+      cryptoScalarmultBase(alicepk, alicesk)
       toHex(alicepk) shouldBe "8520f0098930a754748b7ddcb43ef75a0dbf3a0d26381af4eba4a98eaa9b4e6a"
     }
 
     it("second case") {
       val bobsk = fromHex("5dab087e624a8a4b79e17f8b83800ee66f3bb1292618b6fd1c2f8b27ff88e0eb")
-      val bobpk = new Array[Byte](32)
-      crypto_scalarmult_base(bobpk, bobsk)
+      val bobpk = new Array[Byte](scalarmultBytes)
+      cryptoScalarmultBase(bobpk, bobsk)
       toHex(bobpk) shouldBe "de9edb7d7b7dc1b4d35b61c2ece435373f8343c85b78674dadfc7e146f882b4f"
     }
 
     it("third case") {
       val alicesk = fromHex("77076d0a7318a57d3c16c17251b26645df4c2f87ebc0992ab177fba51db92c2a")
       val bobpk = fromHex("de9edb7d7b7dc1b4d35b61c2ece435373f8343c85b78674dadfc7e146f882b4f")
-      val k = new Array[Byte](32)
-      crypto_scalarmult(k, alicesk, bobpk)
+      val k = new Array[Byte](scalarmultBytes)
+      cryptoScalarmult(k, alicesk, bobpk)
       toHex(k) shouldBe "4a5d9d5ba4ce2de1728e3bf480350f25e07e21c947d19e3376f09b3c1e161742"
     }
 
     it("fourth case") {
       val bobsk = fromHex("5dab087e624a8a4b79e17f8b83800ee66f3bb1292618b6fd1c2f8b27ff88e0eb")
       val alicepk = fromHex("8520f0098930a754748b7ddcb43ef75a0dbf3a0d26381af4eba4a98eaa9b4e6a")
-      val k = new Array[Byte](32)
-      crypto_scalarmult(k, bobsk, alicepk)
+      val k = new Array[Byte](scalarmultBytes)
+      cryptoScalarmult(k, bobsk, alicepk)
       toHex(k) shouldBe "4a5d9d5ba4ce2de1728e3bf480350f25e07e21c947d19e3376f09b3c1e161742"
     }
 
     it("fifth case") {
       val p1 = fromHex("7220f0098930a754748b7ddcb43ef75a0dbf3a0d26381af4eba4a98eaa9b4eea")
       val p2 = fromHex("8520f0098930a754748b7ddcb43ef75a0dbf3a0d26381af4eba4a98eaa9b4e6a")
-      val out1 = new Array[Byte](32)
-      val out2 = new Array[Byte](32)
-      val scalar = new Array[Byte](32)
+      val out1 = new Array[Byte](scalarmultBytes)
+      val out2 = new Array[Byte](scalarmultBytes)
+      val scalar = new Array[Byte](scalarmultScalarBytes)
       scalar(0) = 1
 
-      crypto_scalarmult(out1, scalar, p1)
-      crypto_scalarmult(out2, scalar, p2)
-
-      // a081be62868de74e9debfa2424bf254a5316450fe720a0ff0c3e44397d5f4309
-      println(toHex(out1))
-
-      // a422702df5163d00608885b2f1c6838b6c0262c8ec1c03bcb47498586f61f339
-      println(toHex(out2))
+      cryptoScalarmult(out1, scalar, p1)
+      cryptoScalarmult(out2, scalar, p2)
+      toHex(out1) shouldBe "03ad4080c2910b5e0be22f6c5f7c7e08e642462ef0ec93a654c5c34dc95b556d"
+      toHex(out2) shouldBe "2108adf6afe8883b77ac565e807159be646f7f35275bb0a9bc4ed29759ee665b"
     }
 
   }

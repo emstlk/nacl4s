@@ -9,27 +9,29 @@ object Salsa20 {
   val crypto_core_salsa20_KEYBYTES = 32
   val crypto_core_salsa20_CONSTBYTES = 16
 
+  @inline def rotate(u: Int, c: Int) = (u << c) | (u >>> (32 - c))
+
   def cryptoCore(out: Array[Byte],
                  in: Array[Byte],
                  k: Array[Byte],
                  c: Array[Byte]): Int = {
 
-    var j0, x0 = loadLittleEndian(c, 0)
-    var j1, x1 = loadLittleEndian(k, 0)
-    var j2, x2 = loadLittleEndian(k, 4)
-    var j3, x3 = loadLittleEndian(k, 8)
-    var j4, x4 = loadLittleEndian(k, 12)
-    var j5, x5 = loadLittleEndian(c, 4)
-    var j6, x6 = loadLittleEndian(in, 0)
-    var j7, x7 = loadLittleEndian(in, 4)
-    var j8, x8 = loadLittleEndian(in, 8)
-    var j9, x9 = loadLittleEndian(in, 12)
-    var j10, x10 = loadLittleEndian(c, 8)
-    var j11, x11 = loadLittleEndian(k, 16)
-    var j12, x12 = loadLittleEndian(k, 20)
-    var j13, x13 = loadLittleEndian(k, 24)
-    var j14, x14 = loadLittleEndian(k, 28)
-    var j15, x15 = loadLittleEndian(c, 12)
+    var j0, x0 = loadInt(c, 0)
+    var j1, x1 = loadInt(k, 0)
+    var j2, x2 = loadInt(k, 4)
+    var j3, x3 = loadInt(k, 8)
+    var j4, x4 = loadInt(k, 12)
+    var j5, x5 = loadInt(c, 4)
+    var j6, x6 = loadInt(in, 0)
+    var j7, x7 = loadInt(in, 4)
+    var j8, x8 = loadInt(in, 8)
+    var j9, x9 = loadInt(in, 12)
+    var j10, x10 = loadInt(c, 8)
+    var j11, x11 = loadInt(k, 16)
+    var j12, x12 = loadInt(k, 20)
+    var j13, x13 = loadInt(k, 24)
+    var j14, x14 = loadInt(k, 28)
+    var j15, x15 = loadInt(c, 12)
 
     for (i <- 20 until 0 by -2) {
       x4 ^= rotate(x0 + x12, 7)
@@ -83,22 +85,22 @@ object Salsa20 {
     x14 += j14
     x15 += j15
 
-    saveLittleEndian(out, 0, x0)
-    saveLittleEndian(out, 4, x1)
-    saveLittleEndian(out, 8, x2)
-    saveLittleEndian(out, 12, x3)
-    saveLittleEndian(out, 16, x4)
-    saveLittleEndian(out, 20, x5)
-    saveLittleEndian(out, 24, x6)
-    saveLittleEndian(out, 28, x7)
-    saveLittleEndian(out, 32, x8)
-    saveLittleEndian(out, 36, x9)
-    saveLittleEndian(out, 40, x10)
-    saveLittleEndian(out, 44, x11)
-    saveLittleEndian(out, 48, x12)
-    saveLittleEndian(out, 52, x13)
-    saveLittleEndian(out, 56, x14)
-    saveLittleEndian(out, 60, x15)
+    storeInt(out, 0, x0)
+    storeInt(out, 4, x1)
+    storeInt(out, 8, x2)
+    storeInt(out, 12, x3)
+    storeInt(out, 16, x4)
+    storeInt(out, 20, x5)
+    storeInt(out, 24, x6)
+    storeInt(out, 28, x7)
+    storeInt(out, 32, x8)
+    storeInt(out, 36, x9)
+    storeInt(out, 40, x10)
+    storeInt(out, 44, x11)
+    storeInt(out, 48, x12)
+    storeInt(out, 52, x13)
+    storeInt(out, 56, x14)
+    storeInt(out, 60, x15)
 
     0 //TODO
   }
@@ -117,7 +119,7 @@ object Salsa20 {
     var coffset = 0
 
     while (clen - coffset >= 64) {
-      cryptoCore(c, in, k, sigma)
+      cryptoCore(c, in, k, getSigma)
 
       var u = 1
       for (i <- 8 until 16) {
@@ -131,7 +133,7 @@ object Salsa20 {
 
     if (clen - coffset != 0) {
       val block = new Array[Byte](64)
-      cryptoCore(block, in, k, sigma)
+      cryptoCore(block, in, k, getSigma)
       Array.copy(block, 0, c, coffset, clen - coffset)
     }
 
@@ -156,7 +158,7 @@ object Salsa20 {
     var moffset = 0
 
     while (mlen - moffset >= 64) {
-      cryptoCore(block, in, k, sigma)
+      cryptoCore(block, in, k, getSigma)
 
       for (i <- 0 until 64) {
         c(i) = (m(moffset + i) ^ block(i)).toByte
@@ -174,7 +176,7 @@ object Salsa20 {
     }
 
     if (mlen - moffset != 0) {
-      cryptoCore(block, in, k, sigma)
+      cryptoCore(block, in, k, getSigma)
 
       for (i <- 0 until (mlen - moffset)) {
         c(i) = (m(moffset + i) ^ block(i)).toByte

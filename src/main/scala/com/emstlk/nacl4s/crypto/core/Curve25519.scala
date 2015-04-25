@@ -1,27 +1,38 @@
 package com.emstlk.nacl4s.crypto.core
 
+import com.emstlk.nacl4s.crypto.Utils._
+
 object Curve25519 {
 
-  val crypto_scalarmult_curve25519_BYTES = 32
-  val crypto_scalarmult_curve25519_SCALARBYTES = 32
+  val scalarmultBytes = 32
+  val scalarmultScalarBytes = 32
 
-  def fsum(out: Array[Long], in: Array[Long]) {
-    for (i <- 0 until 5) {
-      out(i) += in(i)
-    }
+  val two54m152 = (1L << 54) - 152
+  val two54m8 = (1L << 54) - 8
+
+  private val basepoint = {
+    val bp = new Array[Byte](32)
+    bp(0) = 9
+    bp
   }
 
-  def fdifference_backwards(out: Array[Long], in: Array[Long]) {
-    val two54m152 = (1L << 54) - 152
-    val two54m8 = (1L << 54) - 8
+  @inline def sum(out: Array[Long], in: Array[Long]) {
+    out(0) += in(0)
+    out(1) += in(1)
+    out(2) += in(2)
+    out(3) += in(3)
+    out(4) += in(4)
+  }
 
+  @inline def differenceBackwards(out: Array[Long], in: Array[Long]) {
     out(0) = in(0) + two54m152 - out(0)
-    for (i <- 1 to 4) {
-      out(i) = in(i) + two54m8 - out(i)
-    }
+    out(1) = in(1) + two54m8 - out(1)
+    out(2) = in(2) + two54m8 - out(2)
+    out(3) = in(3) + two54m8 - out(3)
+    out(4) = in(4) + two54m8 - out(4)
   }
 
-  def fscalar_product(out: Array[Long], in: Array[Long], scalar: Long) {
+  @inline def scalarProduct(out: Array[Long], in: Array[Long], scalar: Long) {
     var a = BigInt(in(0)) * scalar
     out(0) = a.toLong & 0x7ffffffffffffL
 
@@ -40,7 +51,7 @@ object Curve25519 {
     out(0) += ((a >> 51) * 19).toLong
   }
 
-  def fmul(out: Array[Long], in2: Array[Long], in: Array[Long]) {
+  def multiply(out: Array[Long], in2: Array[Long], in: Array[Long]) {
     val t = new Array[BigInt](5)
 
     var r0 = BigInt(in(0))
@@ -104,7 +115,7 @@ object Curve25519 {
     out(4) = r4.toLong
   }
 
-  def fsquare_times(out: Array[Long], in: Array[Long], count: Int) {
+  def squareTimes(out: Array[Long], in: Array[Long], count: Int) {
     val t = new Array[BigInt](5)
 
     var r0 = BigInt(in(0))
@@ -160,37 +171,15 @@ object Curve25519 {
     out(4) = r4.toLong
   }
 
-  def load_limb(in: Array[Byte], offset: Int): Long = {
-    (in(offset).toLong & 0xff) |
-      ((in(offset + 1).toLong & 0xff) << 8) |
-      ((in(offset + 2).toLong & 0xff) << 16) |
-      ((in(offset + 3).toLong & 0xff) << 24) |
-      ((in(offset + 4).toLong & 0xff) << 32) |
-      ((in(offset + 5).toLong & 0xff) << 40) |
-      ((in(offset + 6).toLong & 0xff) << 48) |
-      ((in(offset + 7).toLong & 0xff) << 56)
+  @inline def expand(out: Array[Long], in: Array[Byte]) {
+    out(0) = loadLong(in, 0) & 0x7ffffffffffffL
+    out(1) = (loadLong(in, 6) >>> 3) & 0x7ffffffffffffL
+    out(2) = (loadLong(in, 12) >>> 6) & 0x7ffffffffffffL
+    out(3) = (loadLong(in, 19) >>> 1) & 0x7ffffffffffffL
+    out(4) = (loadLong(in, 24) >>> 12) & 0x7ffffffffffffL
   }
 
-  def store_limb(out: Array[Byte], offset: Int, in: Long) {
-    out(offset) = (in & 0xFF).toByte
-    out(offset + 1) = ((in >>> 8) & 0xFF).toByte
-    out(offset + 2) = ((in >>> 16) & 0xFF).toByte
-    out(offset + 3) = ((in >>> 24) & 0xFF).toByte
-    out(offset + 4) = ((in >>> 32) & 0xFF).toByte
-    out(offset + 5) = ((in >>> 40) & 0xFF).toByte
-    out(offset + 6) = ((in >>> 48) & 0xFF).toByte
-    out(offset + 7) = ((in >>> 56) & 0xFF).toByte
-  }
-
-  def fexpand(out: Array[Long], in: Array[Byte]) {
-    out(0) = load_limb(in, 0) & 0x7ffffffffffffL
-    out(1) = (load_limb(in, 6) >>> 3) & 0x7ffffffffffffL
-    out(2) = (load_limb(in, 12) >>> 6) & 0x7ffffffffffffL
-    out(3) = (load_limb(in, 19) >>> 1) & 0x7ffffffffffffL
-    out(4) = (load_limb(in, 24) >>> 12) & 0x7ffffffffffffL
-  }
-
-  def fcontract(out: Array[Byte], in: Array[Long]) {
+  def contract(out: Array[Byte], in: Array[Long]) {
     val t = new Array[BigInt](5)
 
     t(0) = in(0)
@@ -243,65 +232,58 @@ object Curve25519 {
 
     t(4) &= 0x7ffffffffffffL
 
-    store_limb(out, 0, (t(0) | (t(1) << 51)).toLong)
-    store_limb(out, 8, ((t(1) >> 13) | (t(2) << 38)).toLong)
-    store_limb(out, 16, ((t(2) >> 26) | (t(3) << 25)).toLong)
-    store_limb(out, 24, ((t(3) >> 39) | (t(4) << 12)).toLong)
+    storeLong(out, 0, (t(0) | (t(1) << 51)).toLong)
+    storeLong(out, 8, ((t(1) >> 13) | (t(2) << 38)).toLong)
+    storeLong(out, 16, ((t(2) >> 26) | (t(3) << 25)).toLong)
+    storeLong(out, 24, ((t(3) >> 39) | (t(4) << 12)).toLong)
   }
 
-  def fmonty(x2: Array[Long],
-             z2: Array[Long],
-             x3: Array[Long],
-             z3: Array[Long],
-             x: Array[Long],
-             z: Array[Long],
-             xprime: Array[Long],
-             zprime: Array[Long],
-             qmqp: Array[Long]) {
+  def monty(x2: Array[Long], z2: Array[Long], x3: Array[Long], z3: Array[Long], x: Array[Long],
+            z: Array[Long], xprime: Array[Long], zprime: Array[Long], qmqp: Array[Long]) {
     val origx = new Array[Long](5)
     Array.copy(x, 0, origx, 0, 5)
-    fsum(x, z)
-    fdifference_backwards(z, origx)
+    sum(x, z)
+    differenceBackwards(z, origx)
 
     val origxprime = new Array[Long](5)
     Array.copy(xprime, 0, origxprime, 0, 5)
-    fsum(xprime, zprime)
-    fdifference_backwards(zprime, origxprime)
+    sum(xprime, zprime)
+    differenceBackwards(zprime, origxprime)
     val xxprime = new Array[Long](5)
-    fmul(xxprime, xprime, z)
+    multiply(xxprime, xprime, z)
     val zzprime = new Array[Long](5)
-    fmul(zzprime, x, zprime)
+    multiply(zzprime, x, zprime)
     Array.copy(xxprime, 0, origxprime, 0, 5)
-    fsum(xxprime, zzprime)
-    fdifference_backwards(zzprime, origxprime)
-    fsquare_times(x3, xxprime, 1)
+    sum(xxprime, zzprime)
+    differenceBackwards(zzprime, origxprime)
+    squareTimes(x3, xxprime, 1)
 
     val zzzprime = new Array[Long](5)
-    fsquare_times(zzzprime, zzprime, 1)
-    fmul(z3, zzzprime, qmqp)
+    squareTimes(zzzprime, zzprime, 1)
+    multiply(z3, zzzprime, qmqp)
 
     val xx = new Array[Long](5)
-    fsquare_times(xx, x, 1)
+    squareTimes(xx, x, 1)
     val zz = new Array[Long](5)
-    fsquare_times(zz, z, 1)
-    fmul(x2, xx, zz)
-    fdifference_backwards(zz, xx)
+    squareTimes(zz, z, 1)
+    multiply(x2, xx, zz)
+    differenceBackwards(zz, xx)
     val zzz = new Array[Long](5)
-    fscalar_product(zzz, zz, 121665)
+    scalarProduct(zzz, zz, 121665)
 
-    fsum(zzz, xx)
-    fmul(z2, zz, zzz)
+    sum(zzz, xx)
+    multiply(z2, zz, zzz)
   }
 
-  def swap_conditional(a: Array[Long], b: Array[Long], iswap: Long) {
+  @inline def swapConditional(a: Array[Long], b: Array[Long]) {
     for (i <- 0 until 5) {
-      val x = -iswap & (a(i) ^ b(i))
-      a(i) ^= x
-      b(i) ^= x
+      val x = a(i)
+      a(i) = b(i)
+      b(i) = x
     }
   }
 
-  def cmult(resultx: Array[Long], resultz: Array[Long], n: Array[Byte], q: Array[Long]) {
+  def cmultiply(resultx: Array[Long], resultz: Array[Long], n: Array[Byte], q: Array[Long]) {
     var nqpqx = new Array[Long](5)
     Array.copy(q, 0, nqpqx, 0, 5)
     var nqpqz = new Array[Long](5)
@@ -323,13 +305,19 @@ object Curve25519 {
       var byte = n(31 - i)
 
       for (j <- 0 until 8) {
-        val bit: Long = byte >>> 7 & 1
+        val swapNeeded = (byte >>> 7 & 1) == 1
 
-        swap_conditional(nqx, nqpqx, bit)
-        swap_conditional(nqz, nqpqz, bit)
-        fmonty(nqx2, nqz2, nqpqx2, nqpqz2, nqx, nqz, nqpqx, nqpqz, q)
-        swap_conditional(nqx2, nqpqx2, bit)
-        swap_conditional(nqz2, nqpqz2, bit)
+        if (swapNeeded) {
+          swapConditional(nqx, nqpqx)
+          swapConditional(nqz, nqpqz)
+        }
+
+        monty(nqx2, nqz2, nqpqx2, nqpqz2, nqx, nqz, nqpqx, nqpqz, q)
+
+        if (swapNeeded) {
+          swapConditional(nqx2, nqpqx2)
+          swapConditional(nqz2, nqpqz2)
+        }
 
         var t = nqx
         nqx = nqx2
@@ -361,62 +349,51 @@ object Curve25519 {
     val b = new Array[Long](5)
     val c = new Array[Long](5)
 
-    fsquare_times(a, z, 1)
-    fsquare_times(t0, a, 2)
-    fmul(b, t0, z)
-    fmul(a, b, a)
-    fsquare_times(t0, a, 1)
-    fmul(b, t0, b)
-    fsquare_times(t0, b, 5)
-    fmul(b, t0, b)
-    fsquare_times(t0, b, 10)
-    fmul(c, t0, b)
-    fsquare_times(t0, c, 20)
-    fmul(t0, t0, c)
-    fsquare_times(t0, t0, 10)
-    fmul(b, t0, b)
-    fsquare_times(t0, b, 50)
-    fmul(c, t0, b)
-    fsquare_times(t0, c, 100)
-    fmul(t0, t0, c)
-    fsquare_times(t0, t0, 50)
-    fmul(t0, t0, b)
-    fsquare_times(t0, t0, 5)
-    fmul(out, t0, a)
+    squareTimes(a, z, 1)
+    squareTimes(t0, a, 2)
+    multiply(b, t0, z)
+    multiply(a, b, a)
+    squareTimes(t0, a, 1)
+    multiply(b, t0, b)
+    squareTimes(t0, b, 5)
+    multiply(b, t0, b)
+    squareTimes(t0, b, 10)
+    multiply(c, t0, b)
+    squareTimes(t0, c, 20)
+    multiply(t0, t0, c)
+    squareTimes(t0, t0, 10)
+    multiply(b, t0, b)
+    squareTimes(t0, b, 50)
+    multiply(c, t0, b)
+    squareTimes(t0, c, 100)
+    multiply(t0, t0, c)
+    squareTimes(t0, t0, 50)
+    multiply(t0, t0, b)
+    squareTimes(t0, t0, 5)
+    multiply(out, t0, a)
   }
 
-  def crypto_scalarmult(public: Array[Byte], secret: Array[Byte], basepoint: Array[Byte]): Int = {
+  def cryptoScalarmultBase(q: Array[Byte], n: Array[Byte]) = cryptoScalarmult(q, n, basepoint)
+
+  def cryptoScalarmult(public: Array[Byte], secret: Array[Byte], basepoint: Array[Byte]) {
     val e = new Array[Byte](32)
 
-    for (i <- 0 until 32) {
-      e(i) = secret(i)
-    }
-
+    for (i <- 0 until 32) e(i) = secret(i)
     e(0) = (e(0) & 248).toByte
     e(31) = (e(31) & 127).toByte
     e(31) = (e(31) | 64).toByte
 
     val bp = new Array[Long](5)
-    fexpand(bp, basepoint)
+    expand(bp, basepoint)
 
     val x = new Array[Long](5)
     val z = new Array[Long](5)
-    cmult(x, z, e, bp)
+    cmultiply(x, z, e, bp)
 
     val zmone = new Array[Long](5)
     crecip(zmone, z)
-    fmul(z, x, zmone)
-    fcontract(public, z)
-
-    0
+    multiply(z, x, zmone)
+    contract(public, z)
   }
-
-  val basepoint = {
-    val bp = new Array[Byte](32)
-    bp(0) = 9
-    bp
-  }
-
-  def crypto_scalarmult_base(q: Array[Byte], n: Array[Byte]) = crypto_scalarmult(q, n, basepoint)
 
 }
