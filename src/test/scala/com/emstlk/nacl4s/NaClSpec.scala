@@ -6,13 +6,13 @@ import com.emstlk.nacl4s.crypto.core.{Curve25519, Poly1305}
 import com.emstlk.nacl4s.crypto.core.Poly1305._
 import org.scalatest._
 
-class NaClSpec extends FunSuite with Matchers {
+class NaClSpec extends FunSpec with Matchers {
 
   def toHex(a: Array[Byte]) = a.map("%02x" format _).mkString
 
   def fromHex(s: String) = s.sliding(2, 2).toArray.map(Integer.parseInt(_, 16).toByte)
 
-  test("Save and load a little-endian number") {
+  describe("Save and load a little-endian number") {
     val arr = new Array[Byte](4)
     val number = Int.MaxValue
 
@@ -46,7 +46,7 @@ class NaClSpec extends FunSuite with Matchers {
     0x2a, 0x7d, 0xfb, 0x4b, 0x3d, 0x33, 0x05, 0xd9
   )
 
-  test("Check Poly1305 MAC") {
+  describe("Poly1305 MAC") {
     val mac = new Array[Byte](16)
     cryptoOnetimeauth(mac, 0, c.map(_.toByte), 0, c.length, rs.map(_.toByte))
     mac shouldBe expectedMac.map(_.toByte)
@@ -55,46 +55,55 @@ class NaClSpec extends FunSuite with Matchers {
     check shouldBe 0
   }
 
-  val alicesk = Array(
-    0x77, 0x07, 0x6d, 0x0a, 0x73, 0x18, 0xa5, 0x7d, 0x3c, 0x16, 0xc1,
-    0x72, 0x51, 0xb2, 0x66, 0x45, 0xdf, 0x4c, 0x2f, 0x87, 0xeb, 0xc0,
-    0x99, 0x2a, 0xb1, 0x77, 0xfb, 0xa5, 0x1d, 0xb9, 0x2c, 0x2a
-  )
+  describe("Curve25519") {
 
-  val bobsk = Array(
-    0x5d, 0xab, 0x08, 0x7e, 0x62, 0x4a, 0x8a, 0x4b, 0x79, 0xe1, 0x7f,
-    0x8b, 0x83, 0x80, 0x0e, 0xe6, 0x6f, 0x3b, 0xb1, 0x29, 0x26, 0x18,
-    0xb6, 0xfd, 0x1c, 0x2f, 0x8b, 0x27, 0xff, 0x88, 0xe0, 0xeb
-  )
+    it("first case") {
+      val alicesk = fromHex("77076d0a7318a57d3c16c17251b26645df4c2f87ebc0992ab177fba51db92c2a")
+      val alicepk = new Array[Byte](32)
+      crypto_scalarmult_base(alicepk, alicesk)
+      toHex(alicepk) shouldBe "8520f0098930a754748b7ddcb43ef75a0dbf3a0d26381af4eba4a98eaa9b4e6a"
+    }
 
-  test("Check Curve25519") {
-    val alicepk = new Array[Byte](32)
-    crypto_scalarmult_base(alicepk, alicesk.map(_.toByte))
-    toHex(alicepk) shouldBe "8520f0098930a754748b7ddcb43ef75a0dbf3a0d26381af4eba4a98eaa9b4e6a"
+    it("second case") {
+      val bobsk = fromHex("5dab087e624a8a4b79e17f8b83800ee66f3bb1292618b6fd1c2f8b27ff88e0eb")
+      val bobpk = new Array[Byte](32)
+      crypto_scalarmult_base(bobpk, bobsk)
+      toHex(bobpk) shouldBe "de9edb7d7b7dc1b4d35b61c2ece435373f8343c85b78674dadfc7e146f882b4f"
+    }
 
-    val bobpk = new Array[Byte](32)
-    crypto_scalarmult_base(bobpk, bobsk.map(_.toByte))
-    toHex(bobpk) shouldBe "de9edb7d7b7dc1b4d35b61c2ece435373f8343c85b78674dadfc7e146f882b4f"
+    it("third case") {
+      val alicesk = fromHex("77076d0a7318a57d3c16c17251b26645df4c2f87ebc0992ab177fba51db92c2a")
+      val bobpk = fromHex("de9edb7d7b7dc1b4d35b61c2ece435373f8343c85b78674dadfc7e146f882b4f")
+      val k = new Array[Byte](32)
+      crypto_scalarmult(k, alicesk, bobpk)
+      toHex(k) shouldBe "4a5d9d5ba4ce2de1728e3bf480350f25e07e21c947d19e3376f09b3c1e161742"
+    }
 
-    val al = fromHex("77076d0a7318a57d3c16c17251b26645df4c2f87ebc0992ab177fba51db92c2a")
-    val bo = fromHex("de9edb7d7b7dc1b4d35b61c2ece435373f8343c85b78674dadfc7e146f882b4f")
-    val k = new Array[Byte](32)
-    crypto_scalarmult(k, al, bo)
-    toHex(k) shouldBe "4a5d9d5ba4ce2de1728e3bf480350f25e07e21c947d19e3376f09b3c1e161742"
+    it("fourth case") {
+      val bobsk = fromHex("5dab087e624a8a4b79e17f8b83800ee66f3bb1292618b6fd1c2f8b27ff88e0eb")
+      val alicepk = fromHex("8520f0098930a754748b7ddcb43ef75a0dbf3a0d26381af4eba4a98eaa9b4e6a")
+      val k = new Array[Byte](32)
+      crypto_scalarmult(k, bobsk, alicepk)
+      toHex(k) shouldBe "4a5d9d5ba4ce2de1728e3bf480350f25e07e21c947d19e3376f09b3c1e161742"
+    }
 
+    it("fifth case") {
+      val p1 = fromHex("7220f0098930a754748b7ddcb43ef75a0dbf3a0d26381af4eba4a98eaa9b4eea")
+      val p2 = fromHex("8520f0098930a754748b7ddcb43ef75a0dbf3a0d26381af4eba4a98eaa9b4e6a")
+      val out1 = new Array[Byte](32)
+      val out2 = new Array[Byte](32)
+      val scalar = new Array[Byte](32)
+      scalar(0) = 1
 
-    /*val out = Array[Long](1, 2, 3, 4, 5)
-    val in = Array[Long](6, 7, 8, 9, 10)
-    Curve25519.fdifference_backwards(in, out)
-    println("out: " + out.mkString(","))
-    println("in: " + in.mkString(","))*/
+      crypto_scalarmult(out1, scalar, p1)
+      crypto_scalarmult(out2, scalar, p2)
 
-    /*val out = Array[Long](134523453245L, 2324532456645L, 33425324523456363L, 423423142314234L, 223423534535345235L)
-    val in = Array[Long](63245342534534L, 745643564356L, 567567567547548L, 234124133239L, 15675665765853220L)
-    Curve25519.fscalar_product(in, out, 8743323)
-    show(out)
-    show(in)*/
+      // a081be62868de74e9debfa2424bf254a5316450fe720a0ff0c3e44397d5f4309
+      println(toHex(out1))
 
+      // a422702df5163d00608885b2f1c6838b6c0262c8ec1c03bcb47498586f61f339
+      println(toHex(out2))
+    }
 
   }
 

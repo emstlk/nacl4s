@@ -161,14 +161,14 @@ object Curve25519 {
   }
 
   def load_limb(in: Array[Byte], offset: Int): Long = {
-    in(offset).toLong |
-      (in(offset + 1).toLong << 8) |
-      (in(offset + 2).toLong << 16) |
-      (in(offset + 3).toLong << 24) |
-      (in(offset + 4).toLong << 32) |
-      (in(offset + 5).toLong << 40) |
-      (in(offset + 6).toLong << 48) |
-      (in(offset + 7).toLong << 56)
+    (in(offset).toLong & 0xff) |
+      ((in(offset + 1).toLong & 0xff) << 8) |
+      ((in(offset + 2).toLong & 0xff) << 16) |
+      ((in(offset + 3).toLong & 0xff) << 24) |
+      ((in(offset + 4).toLong & 0xff) << 32) |
+      ((in(offset + 5).toLong & 0xff) << 40) |
+      ((in(offset + 6).toLong & 0xff) << 48) |
+      ((in(offset + 7).toLong & 0xff) << 56)
   }
 
   def store_limb(out: Array[Byte], offset: Int, in: Long) {
