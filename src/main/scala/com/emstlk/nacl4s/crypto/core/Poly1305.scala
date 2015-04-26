@@ -2,12 +2,12 @@ package com.emstlk.nacl4s.crypto.core
 
 object Poly1305 {
 
-  val crypto_onetimeauth_poly1305_BYTES = 16
-  val crypto_onetimeauth_poly1305_KEYBYTES = 32
+  val bytes = 16
+  val keybytes = 32
 
   val blockSize = 16
 
-  val minusp = Array[Int](5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 252)
+  private val minusp = Array[Int](5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 252)
 
   case class State(buffer: Array[Byte] = new Array[Byte](blockSize),
                    var leftover: Int = 0,
@@ -16,29 +16,17 @@ object Poly1305 {
                    pad: Array[Int] = new Array[Int](17),
                    var fin: Byte = 0)
 
-  def cryptoOnetimeauth(out: Array[Byte],
-                        outoffset: Int,
-                        in: Array[Byte],
-                        inoffset: Int,
-                        inlen: Int,
-                        k: Array[Byte]) {
+  def oneTimeAuth(out: Array[Byte], outoffset: Int, in: Array[Byte], inoffset: Int, inlen: Int, k: Array[Byte]) {
     val state = State()
-
     init(state, k)
     update(state, in, inoffset, inlen)
     finish(state, out, outoffset)
   }
 
-  def cryptoOnetimeauthVerify(h: Array[Byte],
-                              hoffset: Int,
-                              in: Array[Byte],
-                              inoffset: Int,
-                              inlen: Int,
-                              k: Array[Byte]): Int = {
+  def oneTimeAuthVerify(h: Array[Byte], hoffset: Int, in: Array[Byte], inoffset: Int, inlen: Int, k: Array[Byte]) {
     val correct = new Array[Byte](16)
-
-    cryptoOnetimeauth(correct, 0, in, inoffset, inlen, k)
-    Verify16.cryptoVerify(h, hoffset, correct)
+    oneTimeAuth(correct, 0, in, inoffset, inlen, k)
+    Verify16.verify(h, hoffset, correct)
   }
 
   def init(st: State, k: Array[Byte]) {
@@ -154,7 +142,6 @@ object Poly1305 {
       pos += want
       st.leftover += want
 
-      //TODO
       if (st.leftover < blockSize) return
 
       blocks(st, st.buffer, 0, blockSize)

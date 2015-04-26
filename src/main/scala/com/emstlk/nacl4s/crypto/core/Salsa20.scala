@@ -4,18 +4,14 @@ import com.emstlk.nacl4s.crypto.Utils._
 
 object Salsa20 {
 
-  val crypto_core_salsa20_OUTPUTBYTES = 64
-  val crypto_core_salsa20_INPUTBYTES = 16
-  val crypto_core_salsa20_KEYBYTES = 32
-  val crypto_core_salsa20_CONSTBYTES = 16
+  val outputbytes = 64
+  val inputbytes = 16
+  val keybytes = 32
+  val constbytes = 16
 
   @inline def rotate(u: Int, c: Int) = (u << c) | (u >>> (32 - c))
 
-  def cryptoCore(out: Array[Byte],
-                 in: Array[Byte],
-                 k: Array[Byte],
-                 c: Array[Byte]): Int = {
-
+  def encrypt(out: Array[Byte], in: Array[Byte], k: Array[Byte], c: Array[Byte]) {
     var j0, x0 = loadInt(c, 0)
     var j1, x1 = loadInt(k, 0)
     var j2, x2 = loadInt(k, 4)
@@ -101,89 +97,72 @@ object Salsa20 {
     storeInt(out, 52, x13)
     storeInt(out, 56, x14)
     storeInt(out, 60, x15)
-
-    0 //TODO
   }
 
-  def cryptoStream(c: Array[Byte],
-                   clen: Int,
-                   n: Array[Byte],
-                   noffset: Int,
-                   k: Array[Byte]): Int = {
+  def encryptStream(c: Array[Byte], clen: Int, n: Array[Byte], noffset: Int, k: Array[Byte]) {
+    if (clen > 0) {
+      val in = new Array[Byte](16)
+      Array.copy(n, noffset, in, 0, 8)
 
-    if (clen == 0) return 0
+      var coffset = 0
 
-    val in = new Array[Byte](16)
-    Array.copy(n, noffset, in, 0, 8)
+      while (clen - coffset >= 64) {
+        encrypt(c, in, k, getSigma)
 
-    var coffset = 0
+        var u = 1
+        for (i <- 8 until 16) {
+          u += in(i) & 0xFF
+          in(i) = u.toByte
+          u >>>= 8
+        }
 
-    while (clen - coffset >= 64) {
-      cryptoCore(c, in, k, getSigma)
-
-      var u = 1
-      for (i <- 8 until 16) {
-        u += in(i) & 0xFF
-        in(i) = u.toByte
-        u >>>= 8
+        coffset += 64
       }
 
-      coffset += 64
+      if (clen - coffset != 0) {
+        val block = new Array[Byte](64)
+        encrypt(block, in, k, getSigma)
+        Array.copy(block, 0, c, coffset, clen - coffset)
+      }
     }
+  }
 
-    if (clen - coffset != 0) {
+  def encryptStreamXor(c: Array[Byte], m: Array[Byte], mlen: Int, n: Array[Byte], noffset: Int, k: Array[Byte]) {
+    if (mlen > 0) {
+      val in = new Array[Byte](16)
       val block = new Array[Byte](64)
-      cryptoCore(block, in, k, getSigma)
-      Array.copy(block, 0, c, coffset, clen - coffset)
-    }
 
-    0 //TODO
-  }
+      Array.copy(n, noffset, in, 0, 8)
 
-  def cryptoStreamXor(c: Array[Byte],
-                      m: Array[Byte],
-                      mlen: Int,
-                      n: Array[Byte],
-                      noffset: Int,
-                      k: Array[Byte]): Int = {
+      var coffset = 0
+      var moffset = 0
 
-    if (mlen == 0) return 0
+      while (mlen - moffset >= 64) {
+        encrypt(block, in, k, getSigma)
 
-    val in = new Array[Byte](16)
-    val block = new Array[Byte](64)
+        for (i <- 0 until 64) {
+          c(i) = (m(moffset + i) ^ block(i)).toByte
+        }
 
-    Array.copy(n, noffset, in, 0, 8)
+        var u = 1
+        for (i <- 8 until 16) {
+          u += in(i) & 0xFF
+          in(i) = u.toByte
+          u >>>= 8
+        }
 
-    var coffset = 0
-    var moffset = 0
-
-    while (mlen - moffset >= 64) {
-      cryptoCore(block, in, k, getSigma)
-
-      for (i <- 0 until 64) {
-        c(i) = (m(moffset + i) ^ block(i)).toByte
+        coffset += 64
+        moffset += 64
       }
 
-      var u = 1
-      for (i <- 8 until 16) {
-        u += in(i) & 0xFF
-        in(i) = u.toByte
-        u >>>= 8
-      }
+      if (mlen - moffset != 0) {
+        encrypt(block, in, k, getSigma)
 
-      coffset += 64
-      moffset += 64
-    }
-
-    if (mlen - moffset != 0) {
-      cryptoCore(block, in, k, getSigma)
-
-      for (i <- 0 until (mlen - moffset)) {
-        c(i) = (m(moffset + i) ^ block(i)).toByte
+        for (i <- 0 until (mlen - moffset)) {
+          c(i) = (m(moffset + i) ^ block(i)).toByte
+        }
       }
     }
-
-    0 //TODO
   }
 
 }

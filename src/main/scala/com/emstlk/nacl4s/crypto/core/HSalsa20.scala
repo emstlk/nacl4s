@@ -5,16 +5,12 @@ import com.emstlk.nacl4s.crypto.core.Salsa20.rotate
 
 object HSalsa20 {
 
-  val crypto_core_hsalsa20_OUTPUTBYTES = 32
-  val crypto_core_hsalsa20_INPUTBYTES = 16
-  val crypto_core_hsalsa20_KEYBYTES = 32
-  val crypto_core_hsalsa20_CONSTBYTES = 16
+  val outputbytes = 32
+  val inputbytes = 16
+  val keybytes = 32
+  val constbytes = 16
 
-  def cryptoCore(out: Array[Byte],
-                 in: Array[Byte],
-                 k: Array[Byte],
-                 c: Array[Byte]): Int = {
-
+  def encrypt(out: Array[Byte], in: Array[Byte], k: Array[Byte], c: Array[Byte]) {
     var x0 = loadInt(c, 0)
     var x1 = loadInt(k, 0)
     var x2 = loadInt(k, 4)
@@ -75,8 +71,6 @@ object HSalsa20 {
     storeInt(out, 20, x7)
     storeInt(out, 24, x8)
     storeInt(out, 28, x9)
-
-    0 //TODO
   }
 
 }

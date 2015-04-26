@@ -4,8 +4,8 @@ import com.emstlk.nacl4s.crypto.Utils._
 
 object Curve25519 {
 
-  val scalarmultBytes = 32
-  val scalarmultScalarBytes = 32
+  val bytes = 32
+  val scalarBytes = 32
 
   val two54m152 = (1L << 54) - 152
   val two54m8 = (1L << 54) - 8
