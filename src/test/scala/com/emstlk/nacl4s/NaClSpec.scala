@@ -1,7 +1,7 @@
 package com.emstlk.nacl4s
 
 import com.emstlk.nacl4s.crypto.Utils._
-import com.emstlk.nacl4s.crypto.core.{Salsa20, HSalsa20, Curve25519}
+import com.emstlk.nacl4s.crypto.core.{XSalsa20, Salsa20, HSalsa20, Curve25519}
 import com.emstlk.nacl4s.crypto.core.Curve25519._
 import com.emstlk.nacl4s.crypto.core.Poly1305._
 import org.scalatest._
@@ -31,15 +31,12 @@ class NaClSpec extends FunSpec with Matchers {
   describe("Salsa20") {
 
     it("first case") {
-      val secondKey = fromHex("dc908dda0b9344a953629b733820778880f3ceb421bb61b91cbd4c3e66256ce4")
-      val noncesuffix = fromHex("8219e0036b7a0b37")
+      val key = fromHex("dc908dda0b9344a953629b733820778880f3ceb421bb61b91cbd4c3e66256ce4")
       val c = fromHex("657870616e642033322d62797465206b")
-      val in = new Array[Byte](16)
       val out = new Array[Byte](64)
-      val h = new Array[Byte](32)
       val expectedOut = "a763249cfc79b52add4d52000bae41c0b7fa0e72368ae15495a1a50714d5c020" +
         "8c2f5ba72de4cf3ddce7efd71d2aebf22d19b607e6647446f4284fa4b89d5d91"
-      Salsa20.encrypt(out, in, secondKey, c)
+      Salsa20.encrypt(out, new Array[Byte](16), key, c)
       toHex(out) shouldBe expectedOut
     }
 
@@ -82,6 +79,16 @@ class NaClSpec extends FunSpec with Matchers {
       show(out, 36, in, 12) shouldBe "d821a7cd"
     }
 
+    it("fourth case") {
+      val key = fromHex("dc908dda0b9344a953629b733820778880f3ceb421bb61b91cbd4c3e66256ce4")
+      val nonce = fromHex("8219e0036b7a0b37")
+      val out = new Array[Byte](64)
+      val expectedOut = "eea6a7251c1e72916d11c2cb214d3c252539121d8e234e652d651fa4c8cff880" +
+        "309e645a74e9e0a60d8243acd9177ab51a1beb8d5a2f5d700c093c5e55855796"
+      Salsa20.encryptStream(out, out.length, nonce, 0, key)
+      toHex(out) shouldBe expectedOut
+    }
+
   }
 
   describe("HSalsa20") {
@@ -96,10 +103,10 @@ class NaClSpec extends FunSpec with Matchers {
 
     it("second case") {
       val firstKey = fromHex("1b27556473e985d462cd51197a9a46c76009549eac6474f206c4ee0844f68389")
-      val nonceprefix = fromHex("69696ee955b62b73cd62bda875fc73d6")
+      val nonce = fromHex("69696ee955b62b73cd62bda875fc73d6")
       val c = fromHex("657870616e642033322d62797465206b")
       val secondKey = new Array[Byte](32)
-      HSalsa20.encrypt(secondKey, nonceprefix, firstKey, c)
+      HSalsa20.encrypt(secondKey, nonce, firstKey, c)
       toHex(secondKey) shouldBe "dc908dda0b9344a953629b733820778880f3ceb421bb61b91cbd4c3e66256ce4"
     }
 
@@ -110,6 +117,48 @@ class NaClSpec extends FunSpec with Matchers {
       val out = new Array[Byte](32)
       HSalsa20.encrypt(out, in, k, c)
       toHex(out) shouldBe "bc1b30fc072cc14075e4baa731b5a845ea9b11e9a5191f94e18cba8fd821a7cd"
+    }
+
+  }
+
+  describe("XSalsa20") {
+
+    it("first case") {
+      val key = fromHex("1b27556473e985d462cd51197a9a46c76009549eac6474f206c4ee0844f68389")
+      val nonce = fromHex("69696ee955b62b73cd62bda875fc73d68219e0036b7a0b37")
+      val out = new Array[Byte](64)
+      val expectedOut = "eea6a7251c1e72916d11c2cb214d3c252539121d8e234e652d651fa4c8cff880" +
+        "309e645a74e9e0a60d8243acd9177ab51a1beb8d5a2f5d700c093c5e55855796"
+      XSalsa20.encryptStream(out, out.length, nonce, key)
+      toHex(out) shouldBe expectedOut
+    }
+
+    it("second case") {
+      val key = fromHex("1b27556473e985d462cd51197a9a46c76009549eac6474f206c4ee0844f68389")
+      val nonce = fromHex("69696ee955b62b73cd62bda875fc73d68219e0036b7a0b37")
+      val rs = new Array[Byte](32)
+      XSalsa20.encryptStream(rs, rs.length, nonce, key)
+      toHex(rs) shouldBe "eea6a7251c1e72916d11c2cb214d3c252539121d8e234e652d651fa4c8cff880"
+    }
+
+    //TODO fix it
+    it("third case") {
+      val key = fromHex("1b27556473e985d462cd51197a9a46c76009549eac6474f206c4ee0844f68389")
+      val nonce = fromHex("69696ee955b62b73cd62bda875fc73d68219e0036b7a0b37")
+      val m = fromHex("0000000000000000000000000000000000000000000000000000000000000000" +
+        "be075fc53c81f2d5cf141316ebeb0c7b5228c52a4c62cbd44b66849b64244ffc" +
+        "e5ecbaaf33bd751a1ac728d45e6c61296cdc3c01233561f41db66cce314adb31" +
+        "0e3be8250c46f06dceea3a7fa1348057e2f6556ad6b1318a024a838f21af1fde" +
+        "048977eb48f59ffd4924ca1c60902e52f0a089bc76897040e082f93776384864" +
+        "5e0705")
+      val expectedC = "8e993b9f48681273c29650ba32fc76ce48332ea7164d96a4476fb8c531a1186a" +
+        "c0dfc17c98dce87b4da7f011ec48c97271d2c20f9b928fe2270d6fb863d51738" +
+        "b48eeee314a7cc8ab932164548e526ae90224368517acfeabd6bb3732bc0e9da" +
+        "99832b61ca01b6de56244a9e88d5f9b37973f622a43d14a6599b1f654cb45a74" +
+        "e355a5"
+      val c = new Array[Byte](163)
+      XSalsa20.encryptStreamXor(c, m, m.length, nonce, key)
+      toHex(c.drop(32)) shouldBe expectedC
     }
 
   }
