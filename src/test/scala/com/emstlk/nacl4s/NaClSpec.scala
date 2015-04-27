@@ -1,7 +1,7 @@
 package com.emstlk.nacl4s
 
 import com.emstlk.nacl4s.crypto.Utils._
-import com.emstlk.nacl4s.crypto.core.Curve25519
+import com.emstlk.nacl4s.crypto.core.{Salsa20, HSalsa20, Curve25519}
 import com.emstlk.nacl4s.crypto.core.Curve25519._
 import com.emstlk.nacl4s.crypto.core.Poly1305._
 import org.scalatest._
@@ -28,9 +28,95 @@ class NaClSpec extends FunSpec with Matchers {
 
   }
 
+  describe("Salsa20") {
+
+    it("first case") {
+      val secondKey = fromHex("dc908dda0b9344a953629b733820778880f3ceb421bb61b91cbd4c3e66256ce4")
+      val noncesuffix = fromHex("8219e0036b7a0b37")
+      val c = fromHex("657870616e642033322d62797465206b")
+      val in = new Array[Byte](16)
+      val out = new Array[Byte](64)
+      val h = new Array[Byte](32)
+      val expectedOut = "a763249cfc79b52add4d52000bae41c0b7fa0e72368ae15495a1a50714d5c020" +
+        "8c2f5ba72de4cf3ddce7efd71d2aebf22d19b607e6647446f4284fa4b89d5d91"
+      Salsa20.encrypt(out, in, secondKey, c)
+      toHex(out) shouldBe expectedOut
+    }
+
+    it("second case") {
+      val k = fromHex("0102030405060708090a0b0c0d0e0f10c9cacbcccdcecfd0d1d2d3d4d5d6d7d8")
+      val in = fromHex("65666768696a6b6c6d6e6f7071727374")
+      val c = fromHex("657870616e642033322d62797465206b")
+      val out = new Array[Byte](64)
+      val expectedOut = "45254427290f6bc1ff8b7a06aae9d9625990b66a1533c841ef31de22d772287e" +
+        "68c507e1c5991f02664e4cb054f5f6b8b1a0858206489577c0c384ecea67f64a"
+      Salsa20.encrypt(out, in, k, c)
+      toHex(out) shouldBe expectedOut
+    }
+
+    it("third case") {
+      val k = fromHex("ee304fca27008d8c126f90027901d80f7f1d8b8dc936cf3b9f819692827e5777")
+      val in = fromHex("81918ef2a5e0da9b3e9060521e4bb352")
+      val c = fromHex("657870616e642033322d62797465206b")
+      val out = new Array[Byte](64)
+      Salsa20.encrypt(out, in, k, c)
+
+      def show(x: Array[Byte], xoffset: Int, y: Array[Byte], yoffset: Int) = {
+        var borrow = 0
+        (0 until 4).map { i =>
+          val xi = x(xoffset + i) & 0xff
+          val yi = y(yoffset + i) & 0xff
+          val res = "%02x".format((xi - yi - borrow) & 0xff)
+          borrow = if (xi < yi + borrow) 1 else 0
+          res
+        }.mkString
+      }
+
+      show(out, 0, c, 0) shouldBe "bc1b30fc"
+      show(out, 20, c, 4) shouldBe "072cc140"
+      show(out, 40, c, 8) shouldBe "75e4baa7"
+      show(out, 60, c, 12) shouldBe "31b5a845"
+      show(out, 24, in, 0) shouldBe "ea9b11e9"
+      show(out, 28, in, 4) shouldBe "a5191f94"
+      show(out, 32, in, 8) shouldBe "e18cba8f"
+      show(out, 36, in, 12) shouldBe "d821a7cd"
+    }
+
+  }
+
+  describe("HSalsa20") {
+
+    it("first case") {
+      val shared = fromHex("4a5d9d5ba4ce2de1728e3bf480350f25e07e21c947d19e3376f09b3c1e161742")
+      val c = fromHex("657870616e642033322d62797465206b")
+      val firstkey = new Array[Byte](32)
+      HSalsa20.encrypt(firstkey, new Array[Byte](32), shared, c)
+      toHex(firstkey) shouldBe "1b27556473e985d462cd51197a9a46c76009549eac6474f206c4ee0844f68389"
+    }
+
+    it("second case") {
+      val firstKey = fromHex("1b27556473e985d462cd51197a9a46c76009549eac6474f206c4ee0844f68389")
+      val nonceprefix = fromHex("69696ee955b62b73cd62bda875fc73d6")
+      val c = fromHex("657870616e642033322d62797465206b")
+      val secondKey = new Array[Byte](32)
+      HSalsa20.encrypt(secondKey, nonceprefix, firstKey, c)
+      toHex(secondKey) shouldBe "dc908dda0b9344a953629b733820778880f3ceb421bb61b91cbd4c3e66256ce4"
+    }
+
+    it("third case") {
+      val k = fromHex("ee304fca27008d8c126f90027901d80f7f1d8b8dc936cf3b9f819692827e5777")
+      val in = fromHex("81918ef2a5e0da9b3e9060521e4bb352")
+      val c = fromHex("657870616e642033322d62797465206b")
+      val out = new Array[Byte](32)
+      HSalsa20.encrypt(out, in, k, c)
+      toHex(out) shouldBe "bc1b30fc072cc14075e4baa731b5a845ea9b11e9a5191f94e18cba8fd821a7cd"
+    }
+
+  }
+
   describe("Poly1305") {
 
-    it("one case") {
+    it("first case") {
       val rs = fromHex("eea6a7251c1e72916d11c2cb214d3c252539121d8e234e652d651fa4c8cff880")
 
       val c = fromHex("8e993b9f48681273c29650ba32fc76ce48332ea7164d96a4476fb8c531a1186a" +
