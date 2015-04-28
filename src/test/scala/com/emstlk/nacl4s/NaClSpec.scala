@@ -141,7 +141,6 @@ class NaClSpec extends FunSpec with Matchers {
       toHex(rs) shouldBe "eea6a7251c1e72916d11c2cb214d3c252539121d8e234e652d651fa4c8cff880"
     }
 
-    //TODO fix it
     it("third case") {
       val key = fromHex("1b27556473e985d462cd51197a9a46c76009549eac6474f206c4ee0844f68389")
       val nonce = fromHex("69696ee955b62b73cd62bda875fc73d68219e0036b7a0b37")

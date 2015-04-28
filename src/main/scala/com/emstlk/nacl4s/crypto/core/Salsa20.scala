@@ -141,7 +141,7 @@ object Salsa20 {
         encrypt(block, in, k, getSigma)
 
         for (i <- 0 until 64) {
-          c(i) = (m(moffset + i) ^ block(i)).toByte
+          c(coffset + i) = (m(moffset + i) ^ block(i)).toByte
         }
 
         var u = 1
@@ -159,7 +159,7 @@ object Salsa20 {
         encrypt(block, in, k, getSigma)
 
         for (i <- 0 until (mlen - moffset)) {
-          c(i) = (m(moffset + i) ^ block(i)).toByte
+          c(coffset + i) = (m(moffset + i) ^ block(i)).toByte
         }
       }
     }
