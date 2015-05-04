@@ -16,17 +16,17 @@ object Poly1305 {
                    pad: Array[Int] = new Array[Int](17),
                    var fin: Byte = 0)
 
-  def oneTimeAuth(out: Array[Byte], outoffset: Int, in: Array[Byte], inoffset: Int, inlen: Int, k: Array[Byte]) {
+  def cryptoOneTimeAuth(out: Array[Byte], outoffset: Int, in: Array[Byte], inoffset: Int, inlen: Int, k: Array[Byte]) {
     val state = State()
     init(state, k)
     update(state, in, inoffset, inlen)
     finish(state, out, outoffset)
   }
 
-  def oneTimeAuthVerify(h: Array[Byte], hoffset: Int, in: Array[Byte], inoffset: Int, inlen: Int, k: Array[Byte]) {
+  def cryptoOneTimeAuthVerify(h: Array[Byte], hoffset: Int, in: Array[Byte], inoffset: Int, inlen: Int, k: Array[Byte]) {
     val correct = new Array[Byte](16)
-    oneTimeAuth(correct, 0, in, inoffset, inlen, k)
-    Verify16.verify(h, hoffset, correct)
+    cryptoOneTimeAuth(correct, 0, in, inoffset, inlen, k)
+    Verify16.cryptoVerify(h, hoffset, correct)
   }
 
   def init(st: State, k: Array[Byte]) {

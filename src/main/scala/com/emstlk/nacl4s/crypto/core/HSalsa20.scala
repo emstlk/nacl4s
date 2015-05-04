@@ -10,7 +10,7 @@ object HSalsa20 {
   val keybytes = 32
   val constbytes = 16
 
-  def encrypt(out: Array[Byte], in: Array[Byte], k: Array[Byte], c: Array[Byte]) {
+  def cryptoCore(out: Array[Byte], in: Array[Byte], k: Array[Byte], c: Array[Byte]) {
     var x0 = loadInt(c, 0)
     var x1 = loadInt(k, 0)
     var x2 = loadInt(k, 4)

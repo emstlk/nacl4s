@@ -1,10 +1,14 @@
 package com.emstlk.nacl4s.crypto
 
+import java.security.SecureRandom
+
 object Utils {
 
   private val sigma = "expand 32-byte k".map(_.toByte).toArray
 
   def getSigma = sigma.clone()
+
+  lazy val random = new SecureRandom
 
   @inline def loadInt(a: Array[Byte], offset: Int): Int = {
     a(offset) & 0xFF |

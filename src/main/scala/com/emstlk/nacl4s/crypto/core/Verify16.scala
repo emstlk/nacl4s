@@ -4,7 +4,7 @@ object Verify16 {
 
   val bytes = 16
 
-  def verify(x: Array[Byte], xoffset: Int, y: Array[Byte]) {
+  def cryptoVerify(x: Array[Byte], xoffset: Int, y: Array[Byte]) {
     var differentbits = 0
     for (i <- 0 to 15) {
       differentbits |= x(xoffset + i) ^ y(i)

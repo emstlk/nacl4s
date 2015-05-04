@@ -36,7 +36,7 @@ class NaClSpec extends FunSpec with Matchers {
       val out = new Array[Byte](64)
       val expectedOut = "a763249cfc79b52add4d52000bae41c0b7fa0e72368ae15495a1a50714d5c020" +
         "8c2f5ba72de4cf3ddce7efd71d2aebf22d19b607e6647446f4284fa4b89d5d91"
-      Salsa20.encrypt(out, new Array[Byte](16), key, c)
+      Salsa20.cryptoCore(out, new Array[Byte](16), key, c)
       toHex(out) shouldBe expectedOut
     }
 
@@ -47,7 +47,7 @@ class NaClSpec extends FunSpec with Matchers {
       val out = new Array[Byte](64)
       val expectedOut = "45254427290f6bc1ff8b7a06aae9d9625990b66a1533c841ef31de22d772287e" +
         "68c507e1c5991f02664e4cb054f5f6b8b1a0858206489577c0c384ecea67f64a"
-      Salsa20.encrypt(out, in, k, c)
+      Salsa20.cryptoCore(out, in, k, c)
       toHex(out) shouldBe expectedOut
     }
 
@@ -56,7 +56,7 @@ class NaClSpec extends FunSpec with Matchers {
       val in = fromHex("81918ef2a5e0da9b3e9060521e4bb352")
       val c = fromHex("657870616e642033322d62797465206b")
       val out = new Array[Byte](64)
-      Salsa20.encrypt(out, in, k, c)
+      Salsa20.cryptoCore(out, in, k, c)
 
       def show(x: Array[Byte], xoffset: Int, y: Array[Byte], yoffset: Int) = {
         var borrow = 0
@@ -85,7 +85,7 @@ class NaClSpec extends FunSpec with Matchers {
       val out = new Array[Byte](64)
       val expectedOut = "eea6a7251c1e72916d11c2cb214d3c252539121d8e234e652d651fa4c8cff880" +
         "309e645a74e9e0a60d8243acd9177ab51a1beb8d5a2f5d700c093c5e55855796"
-      Salsa20.encryptStream(out, out.length, nonce, 0, key)
+      Salsa20.cryptoStream(out, out.length, nonce, 0, key)
       toHex(out) shouldBe expectedOut
     }
 
@@ -97,7 +97,7 @@ class NaClSpec extends FunSpec with Matchers {
       val shared = fromHex("4a5d9d5ba4ce2de1728e3bf480350f25e07e21c947d19e3376f09b3c1e161742")
       val c = fromHex("657870616e642033322d62797465206b")
       val firstkey = new Array[Byte](32)
-      HSalsa20.encrypt(firstkey, new Array[Byte](32), shared, c)
+      HSalsa20.cryptoCore(firstkey, new Array[Byte](32), shared, c)
       toHex(firstkey) shouldBe "1b27556473e985d462cd51197a9a46c76009549eac6474f206c4ee0844f68389"
     }
 
@@ -106,7 +106,7 @@ class NaClSpec extends FunSpec with Matchers {
       val nonce = fromHex("69696ee955b62b73cd62bda875fc73d6")
       val c = fromHex("657870616e642033322d62797465206b")
       val secondKey = new Array[Byte](32)
-      HSalsa20.encrypt(secondKey, nonce, firstKey, c)
+      HSalsa20.cryptoCore(secondKey, nonce, firstKey, c)
       toHex(secondKey) shouldBe "dc908dda0b9344a953629b733820778880f3ceb421bb61b91cbd4c3e66256ce4"
     }
 
@@ -115,7 +115,7 @@ class NaClSpec extends FunSpec with Matchers {
       val in = fromHex("81918ef2a5e0da9b3e9060521e4bb352")
       val c = fromHex("657870616e642033322d62797465206b")
       val out = new Array[Byte](32)
-      HSalsa20.encrypt(out, in, k, c)
+      HSalsa20.cryptoCore(out, in, k, c)
       toHex(out) shouldBe "bc1b30fc072cc14075e4baa731b5a845ea9b11e9a5191f94e18cba8fd821a7cd"
     }
 
@@ -129,7 +129,7 @@ class NaClSpec extends FunSpec with Matchers {
       val out = new Array[Byte](64)
       val expectedOut = "eea6a7251c1e72916d11c2cb214d3c252539121d8e234e652d651fa4c8cff880" +
         "309e645a74e9e0a60d8243acd9177ab51a1beb8d5a2f5d700c093c5e55855796"
-      XSalsa20.encryptStream(out, out.length, nonce, key)
+      XSalsa20.cryptoStream(out, out.length, nonce, key)
       toHex(out) shouldBe expectedOut
     }
 
@@ -137,7 +137,7 @@ class NaClSpec extends FunSpec with Matchers {
       val key = fromHex("1b27556473e985d462cd51197a9a46c76009549eac6474f206c4ee0844f68389")
       val nonce = fromHex("69696ee955b62b73cd62bda875fc73d68219e0036b7a0b37")
       val rs = new Array[Byte](32)
-      XSalsa20.encryptStream(rs, rs.length, nonce, key)
+      XSalsa20.cryptoStream(rs, rs.length, nonce, key)
       toHex(rs) shouldBe "eea6a7251c1e72916d11c2cb214d3c252539121d8e234e652d651fa4c8cff880"
     }
 
@@ -156,7 +156,7 @@ class NaClSpec extends FunSpec with Matchers {
         "99832b61ca01b6de56244a9e88d5f9b37973f622a43d14a6599b1f654cb45a74" +
         "e355a5"
       val c = new Array[Byte](163)
-      XSalsa20.encryptStreamXor(c, m, m.length, nonce, key)
+      XSalsa20.cryptoStreamXor(c, m, m.length, nonce, key)
       toHex(c.drop(32)) shouldBe expectedC
     }
 
@@ -174,11 +174,11 @@ class NaClSpec extends FunSpec with Matchers {
         "e355a5")
 
       val mac = new Array[Byte](16)
-      oneTimeAuth(mac, 0, c, 0, c.length, rs)
+      cryptoOneTimeAuth(mac, 0, c, 0, c.length, rs)
       toHex(mac) shouldBe "f3ffc7703f9400e52a7dfb4b3d3305d9"
 
       noException should be thrownBy {
-        oneTimeAuthVerify(mac, 0, c, 0, c.length, rs)
+        cryptoOneTimeAuthVerify(mac, 0, c, 0, c.length, rs)
       }
     }
 

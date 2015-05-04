@@ -7,16 +7,16 @@ object XSalsa20 {
   val keybytes = 32
   val noncebytes = 24
 
-  def encryptStream(c: Array[Byte], clen: Int, n: Array[Byte], k: Array[Byte]) {
+  def cryptoStream(c: Array[Byte], clen: Int, n: Array[Byte], k: Array[Byte]) {
     val subkey = new Array[Byte](32)
-    HSalsa20.encrypt(subkey, n, k, getSigma)
-    Salsa20.encryptStream(c, clen, n, 16, subkey)
+    HSalsa20.cryptoCore(subkey, n, k, getSigma)
+    Salsa20.cryptoStream(c, clen, n, 16, subkey)
   }
 
-  def encryptStreamXor(c: Array[Byte], m: Array[Byte], mlen: Int, n: Array[Byte], k: Array[Byte]) {
+  def cryptoStreamXor(c: Array[Byte], m: Array[Byte], mlen: Int, n: Array[Byte], k: Array[Byte]) {
     val subkey = new Array[Byte](32)
-    HSalsa20.encrypt(subkey, n, k, getSigma)
-    Salsa20.encryptStreamXor(c, m, mlen, n, 16, subkey)
+    HSalsa20.cryptoCore(subkey, n, k, getSigma)
+    Salsa20.cryptoStreamXor(c, m, mlen, n, 16, subkey)
   }
 
 }

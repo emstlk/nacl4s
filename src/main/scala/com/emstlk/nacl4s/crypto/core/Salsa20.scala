@@ -11,7 +11,7 @@ object Salsa20 {
 
   @inline def rotate(u: Int, c: Int) = (u << c) | (u >>> (32 - c))
 
-  def encrypt(out: Array[Byte], in: Array[Byte], k: Array[Byte], c: Array[Byte]) {
+  def cryptoCore(out: Array[Byte], in: Array[Byte], k: Array[Byte], c: Array[Byte]) {
     var j0, x0 = loadInt(c, 0)
     var j1, x1 = loadInt(k, 0)
     var j2, x2 = loadInt(k, 4)
@@ -99,7 +99,7 @@ object Salsa20 {
     storeInt(out, 60, x15)
   }
 
-  def encryptStream(c: Array[Byte], clen: Int, n: Array[Byte], noffset: Int, k: Array[Byte]) {
+  def cryptoStream(c: Array[Byte], clen: Int, n: Array[Byte], noffset: Int, k: Array[Byte]) {
     if (clen > 0) {
       val in = new Array[Byte](16)
       Array.copy(n, noffset, in, 0, 8)
@@ -107,7 +107,7 @@ object Salsa20 {
       var coffset = 0
 
       while (clen - coffset >= 64) {
-        encrypt(c, in, k, getSigma)
+        cryptoCore(c, in, k, getSigma)
 
         var u = 1
         for (i <- 8 until 16) {
@@ -121,13 +121,13 @@ object Salsa20 {
 
       if (clen - coffset != 0) {
         val block = new Array[Byte](64)
-        encrypt(block, in, k, getSigma)
+        cryptoCore(block, in, k, getSigma)
         Array.copy(block, 0, c, coffset, clen - coffset)
       }
     }
   }
 
-  def encryptStreamXor(c: Array[Byte], m: Array[Byte], mlen: Int, n: Array[Byte], noffset: Int, k: Array[Byte]) {
+  def cryptoStreamXor(c: Array[Byte], m: Array[Byte], mlen: Int, n: Array[Byte], noffset: Int, k: Array[Byte]) {
     if (mlen > 0) {
       val in = new Array[Byte](16)
       val block = new Array[Byte](64)
@@ -138,7 +138,7 @@ object Salsa20 {
       var moffset = 0
 
       while (mlen - moffset >= 64) {
-        encrypt(block, in, k, getSigma)
+        cryptoCore(block, in, k, getSigma)
 
         for (i <- 0 until 64) {
           c(coffset + i) = (m(moffset + i) ^ block(i)).toByte
@@ -156,7 +156,7 @@ object Salsa20 {
       }
 
       if (mlen - moffset != 0) {
-        encrypt(block, in, k, getSigma)
+        cryptoCore(block, in, k, getSigma)
 
         for (i <- 0 until (mlen - moffset)) {
           c(coffset + i) = (m(moffset + i) ^ block(i)).toByte
