@@ -10,6 +10,10 @@ object Utils {
 
   lazy val random = new SecureRandom
 
+  @inline def checkLength(a: Array[Byte], length: Int) {
+    require(a != null && a.length == length, s"Wrong length, required $length")
+  }
+
   @inline def loadInt(a: Array[Byte], offset: Int): Int = {
     a(offset) & 0xFF |
       (a(offset + 1) & 0xFF) << 8 |

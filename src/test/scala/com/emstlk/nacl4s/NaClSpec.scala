@@ -232,4 +232,24 @@ class NaClSpec extends FunSpec with Matchers {
 
   }
 
+  describe("CryptoBox") {
+
+    it("first case") {
+      val key = new Array[Byte](32)
+      random.nextBytes(key)
+
+      val nonce = new Array[Byte](24)
+      random.nextBytes(nonce)
+      val msg = new Array[Byte](random.nextInt(1000) + 1)
+      random.nextBytes(msg)
+
+      val box = NaCl.secretBox(key)
+      val encrypted = box.encrypt(nonce, msg)
+      val decrypted = box.decrypt(nonce, encrypted)
+
+      decrypted shouldBe msg
+    }
+
+  }
+
 }
