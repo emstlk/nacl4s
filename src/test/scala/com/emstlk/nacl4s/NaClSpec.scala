@@ -1,7 +1,13 @@
 package com.emstlk.nacl4s
 
 import com.emstlk.nacl4s.crypto.Utils._
+import com.emstlk.nacl4s.crypto.box.Curve25519XSalsa20Poly1305
 import com.emstlk.nacl4s.crypto.core._
+import com.emstlk.nacl4s.crypto.onetimeauth.Poly1305
+import com.emstlk.nacl4s.crypto.scalarmult.Curve25519
+import com.emstlk.nacl4s.crypto.secretbox.XSalsa20Poly1305
+import com.emstlk.nacl4s.crypto.stream.XSalsa20
+import com.emstlk.nacl4s.crypto.verify.Verify16
 import org.scalatest._
 
 class NaClSpec extends FunSpec with Matchers {
@@ -184,7 +190,7 @@ class NaClSpec extends FunSpec with Matchers {
       }
     }
 
-    it("second case") {
+    it("random 10000 cases") {
       val key = new Array[Byte](32)
       val c = new Array[Byte](10000)
       val a = new Array[Byte](16)

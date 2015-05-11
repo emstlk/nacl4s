@@ -8,9 +8,9 @@ object Build extends Build {
     base = file("."),
     settings = Seq(
       organization := "com.emstlk.nacl4s",
-      version := "0.0.1",
+      version := "0.0.1-SNAPSHOT",
       scalaVersion := "2.11.6",
-      scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature"),
+      scalacOptions ++= Seq("-encoding", "UTF-8", "-deprecation", "-unchecked", "-feature"),
       libraryDependencies ++= Seq(
         "org.scalatest" %% "scalatest" % "2.2.4" % "test" withSources()
       )

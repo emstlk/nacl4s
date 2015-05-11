@@ -1,6 +1,9 @@
-package com.emstlk.nacl4s.crypto.core
+package com.emstlk.nacl4s.crypto.box
 
 import com.emstlk.nacl4s.crypto.Utils._
+import com.emstlk.nacl4s.crypto.core.HSalsa20
+import com.emstlk.nacl4s.crypto.scalarmult.Curve25519
+import com.emstlk.nacl4s.crypto.secretbox.XSalsa20Poly1305
 
 object Curve25519XSalsa20Poly1305 {
 

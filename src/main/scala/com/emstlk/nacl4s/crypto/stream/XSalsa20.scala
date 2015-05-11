@@ -1,6 +1,7 @@
-package com.emstlk.nacl4s.crypto.core
+package com.emstlk.nacl4s.crypto.stream
 
 import com.emstlk.nacl4s.crypto.Utils._
+import com.emstlk.nacl4s.crypto.core.{HSalsa20, Salsa20}
 
 object XSalsa20 {
 

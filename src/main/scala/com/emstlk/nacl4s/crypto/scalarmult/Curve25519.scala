@@ -1,4 +1,4 @@
-package com.emstlk.nacl4s.crypto.core
+package com.emstlk.nacl4s.crypto.scalarmult
 
 import com.emstlk.nacl4s.crypto.Utils._
 

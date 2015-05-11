@@ -1,6 +1,7 @@
-package com.emstlk.nacl4s.crypto.core
+package com.emstlk.nacl4s.crypto.onetimeauth
 
 import com.emstlk.nacl4s.crypto.Utils._
+import com.emstlk.nacl4s.crypto.verify.Verify16
 
 object Poly1305 {
 

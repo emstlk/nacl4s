@@ -1,9 +1,13 @@
 package com.emstlk.nacl4s
 
 import com.emstlk.nacl4s.crypto.Utils._
-import com.emstlk.nacl4s.crypto.core.{Curve25519, Curve25519XSalsa20Poly1305, XSalsa20Poly1305}
+import com.emstlk.nacl4s.crypto.box.Curve25519XSalsa20Poly1305
+import com.emstlk.nacl4s.crypto.scalarmult.Curve25519
+import com.emstlk.nacl4s.crypto.secretbox.XSalsa20Poly1305
 
 object NaCl {
+
+  def box(keyPair: KeyPair) = new Box(keyPair.publicKey, keyPair.privateKey)
 
   def box(publicKey: Array[Byte], privateKey: Array[Byte]) = new Box(publicKey, privateKey)
 
@@ -17,57 +21,63 @@ object NaCl {
 
 class Box(publicKey: Array[Byte], privateKey: Array[Byte]) {
 
-  checkLength(publicKey, 32)
-  checkLength(privateKey, 32)
+  import Curve25519XSalsa20Poly1305._
+
+  checkLength(publicKey, publicKeyBytes)
+  checkLength(privateKey, secretKeyBytes)
 
   def encrypt(nonce: Array[Byte], message: Array[Byte]): Array[Byte] = {
-    checkLength(nonce, 24)
-    val msg = new Array[Byte](32) ++ message
-    Curve25519XSalsa20Poly1305.cryptoBox(msg, msg, msg.length, nonce, publicKey, privateKey)
-    msg.drop(16)
+    checkLength(nonce, nonceBytes)
+    val msg = new Array[Byte](zeroBytes) ++ message
+    cryptoBox(msg, msg, msg.length, nonce, publicKey, privateKey)
+    msg.drop(boxZeroBytes)
   }
 
   def decrypt(nonce: Array[Byte], message: Array[Byte]): Array[Byte] = {
-    checkLength(nonce, 24)
-    val msg = new Array[Byte](16) ++ message
-    Curve25519XSalsa20Poly1305.cryptoBoxOpen(msg, msg, msg.length, nonce, publicKey, privateKey)
-    msg.drop(32)
+    checkLength(nonce, nonceBytes)
+    val msg = new Array[Byte](boxZeroBytes) ++ message
+    cryptoBoxOpen(msg, msg, msg.length, nonce, publicKey, privateKey)
+    msg.drop(zeroBytes)
   }
 
 }
 
 class SecretBox(key: Array[Byte]) {
 
-  checkLength(key, 32)
+  import XSalsa20Poly1305._
+
+  checkLength(key, keyBytes)
 
   def encrypt(nonce: Array[Byte], message: Array[Byte]): Array[Byte] = {
-    checkLength(nonce, 24)
-    val msg = new Array[Byte](32) ++ message
-    XSalsa20Poly1305.cryptoSecretBox(msg, msg, msg.length, nonce, key)
-    msg.drop(16)
+    checkLength(nonce, nonceBytes)
+    val msg = new Array[Byte](zeroBytes) ++ message
+    cryptoSecretBox(msg, msg, msg.length, nonce, key)
+    msg.drop(boxZeroBytes)
   }
 
   def decrypt(nonce: Array[Byte], message: Array[Byte]): Array[Byte] = {
-    checkLength(nonce, 24)
-    val msg = new Array[Byte](16) ++ message
-    XSalsa20Poly1305.cryptoSecretBoxOpen(msg, msg, msg.length, nonce, key)
-    msg.drop(32)
+    checkLength(nonce, nonceBytes)
+    val msg = new Array[Byte](boxZeroBytes) ++ message
+    cryptoSecretBoxOpen(msg, msg, msg.length, nonce, key)
+    msg.drop(zeroBytes)
   }
 
 }
 
 class KeyPair private(val privateKey: Array[Byte], val publicKey: Array[Byte]) {
 
-  checkLength(privateKey, 24)
-  checkLength(publicKey, 24)
+  checkLength(privateKey, Curve25519XSalsa20Poly1305.secretKeyBytes)
 
   def this() {
-    this(new Array[Byte](32), new Array[Byte](32))
+    this(
+      new Array[Byte](Curve25519XSalsa20Poly1305.secretKeyBytes),
+      new Array[Byte](Curve25519XSalsa20Poly1305.publicKeyBytes)
+    )
     Curve25519XSalsa20Poly1305.cryptoBoxKeypair(publicKey, privateKey)
   }
 
   def this(privateKey: Array[Byte]) {
-    this(privateKey, new Array[Byte](32))
+    this(privateKey, new Array[Byte](Curve25519XSalsa20Poly1305.publicKeyBytes))
     Curve25519.cryptoScalarmultBase(publicKey, privateKey)
   }
 

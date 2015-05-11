@@ -1,4 +1,7 @@
-package com.emstlk.nacl4s.crypto.core
+package com.emstlk.nacl4s.crypto.secretbox
+
+import com.emstlk.nacl4s.crypto.onetimeauth.Poly1305
+import com.emstlk.nacl4s.crypto.stream.XSalsa20
 
 object XSalsa20Poly1305 {
 
