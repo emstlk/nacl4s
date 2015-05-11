@@ -178,13 +178,13 @@ object Poly1305 {
     h3 = ((h3 >>> 18) | (h4 << 8)) & 0xffffffff
 
     /* mac = (h + pad) % (2^128) */
-    var f = h0.asULong + st.pad(0).asULong
+    var f = (h0 & 0xffffffffL) + (st.pad(0) & 0xffffffffL)
     h0 = f.toInt
-    f = h1.asULong + st.pad(1).asULong + (f >>> 32)
+    f = (h1 & 0xffffffffL) + (st.pad(1) & 0xffffffffL) + (f >>> 32)
     h1 = f.toInt
-    f = h2.asULong + st.pad(2).asULong + (f >>> 32)
+    f = (h2 & 0xffffffffL) + (st.pad(2) & 0xffffffffL) + (f >>> 32)
     h2 = f.toInt
-    f = h3.asULong + st.pad(3).asULong + (f >>> 32)
+    f = (h3 & 0xffffffffL) + (st.pad(3) & 0xffffffffL) + (f >>> 32)
     h3 = f.toInt
 
     storeInt(mac, offset, h0)

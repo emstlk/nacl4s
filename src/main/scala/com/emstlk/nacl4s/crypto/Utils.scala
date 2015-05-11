@@ -50,10 +50,6 @@ object Utils {
     out(offset + 7) = ((in >>> 56) & 0xff).toByte
   }
 
-  implicit class UnsignedLong(i: Int) {
-    def asULong = i & 0xffffffffL
-  }
-
   def toHex(a: Array[Byte]) = a.map("%02x" format _).mkString
 
   def fromHex(s: String) = s.sliding(2, 2).toArray.map(Integer.parseInt(_, 16).toByte)
