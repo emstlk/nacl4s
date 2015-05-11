@@ -15,10 +15,10 @@ object Utils {
   }
 
   @inline def loadInt(a: Array[Byte], offset: Int): Int = {
-    a(offset) & 0xFF |
-      (a(offset + 1) & 0xFF) << 8 |
-      (a(offset + 2) & 0xFF) << 16 |
-      (a(offset + 3) & 0xFF) << 24
+    a(offset) & 0xff |
+      (a(offset + 1) & 0xff) << 8 |
+      (a(offset + 2) & 0xff) << 16 |
+      (a(offset + 3) & 0xff) << 24
   }
 
   @inline def storeInt(a: Array[Byte], offset: Int, value: Int) {
@@ -40,14 +40,22 @@ object Utils {
   }
 
   @inline def storeLong(out: Array[Byte], offset: Int, in: Long) {
-    out(offset) = (in & 0xFF).toByte
-    out(offset + 1) = ((in >>> 8) & 0xFF).toByte
-    out(offset + 2) = ((in >>> 16) & 0xFF).toByte
-    out(offset + 3) = ((in >>> 24) & 0xFF).toByte
-    out(offset + 4) = ((in >>> 32) & 0xFF).toByte
-    out(offset + 5) = ((in >>> 40) & 0xFF).toByte
-    out(offset + 6) = ((in >>> 48) & 0xFF).toByte
-    out(offset + 7) = ((in >>> 56) & 0xFF).toByte
+    out(offset) = (in & 0xff).toByte
+    out(offset + 1) = ((in >>> 8) & 0xff).toByte
+    out(offset + 2) = ((in >>> 16) & 0xff).toByte
+    out(offset + 3) = ((in >>> 24) & 0xff).toByte
+    out(offset + 4) = ((in >>> 32) & 0xff).toByte
+    out(offset + 5) = ((in >>> 40) & 0xff).toByte
+    out(offset + 6) = ((in >>> 48) & 0xff).toByte
+    out(offset + 7) = ((in >>> 56) & 0xff).toByte
   }
+
+  implicit class UnsignedLong(i: Int) {
+    def asULong = i & 0xffffffffL
+  }
+
+  def toHex(a: Array[Byte]) = a.map("%02x" format _).mkString
+
+  def fromHex(s: String) = s.sliding(2, 2).toArray.map(Integer.parseInt(_, 16).toByte)
 
 }

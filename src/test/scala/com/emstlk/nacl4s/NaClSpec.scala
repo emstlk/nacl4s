@@ -1,16 +1,12 @@
 package com.emstlk.nacl4s
 
 import com.emstlk.nacl4s.crypto.Utils._
-import com.emstlk.nacl4s.crypto.core.{XSalsa20, Salsa20, HSalsa20, Curve25519}
-import com.emstlk.nacl4s.crypto.core.Curve25519._
 import com.emstlk.nacl4s.crypto.core.Poly1305._
+import com.emstlk.nacl4s.crypto.core._
+import com.emstlk.nacl4s.crypto.core.Curve25519._
 import org.scalatest._
 
 class NaClSpec extends FunSpec with Matchers {
-
-  def toHex(a: Array[Byte]) = a.map("%02x" format _).mkString
-
-  def fromHex(s: String) = s.sliding(2, 2).toArray.map(Integer.parseInt(_, 16).toByte)
 
   describe("Utils") {
 
@@ -232,7 +228,30 @@ class NaClSpec extends FunSpec with Matchers {
 
   }
 
-  describe("CryptoBox") {
+  describe("Verify16") {
+
+    it("first case") {
+      val v16 = new Array[Byte](16)
+      random.nextBytes(v16)
+
+      val v16x = new Array[Byte](16)
+      Array.copy(v16, 0, v16x, 0, 16)
+
+      noException should be thrownBy {
+        Verify16.cryptoVerify(v16, 0, v16x)
+      }
+
+      val idx = random.nextInt(16)
+      v16x(idx) = (v16x(idx) + 1).toByte
+
+      the[RuntimeException] thrownBy {
+        Verify16.cryptoVerify(v16, 0, v16x)
+      }
+    }
+
+  }
+
+  describe("XSalsa20Poly1305") {
 
     it("first case") {
       val key = new Array[Byte](32)
@@ -248,6 +267,31 @@ class NaClSpec extends FunSpec with Matchers {
       val decrypted = box.decrypt(nonce, encrypted)
 
       decrypted shouldBe msg
+    }
+
+  }
+
+  describe("Curve25519XSalsa20Poly1305") {
+
+    it("first case") {
+      val sk = fromHex("77076d0a7318a57d3c16c17251b26645df4c2f87ebc0992ab177fba51db92c2a")
+      val pk = fromHex("de9edb7d7b7dc1b4d35b61c2ece435373f8343c85b78674dadfc7e146f882b4f")
+      val nonce = fromHex("69696ee955b62b73cd62bda875fc73d68219e0036b7a0b37")
+      val m = fromHex("0000000000000000000000000000000000000000000000000000000000000000" +
+        "be075fc53c81f2d5cf141316ebeb0c7b5228c52a4c62cbd44b66849b64244ffc" +
+        "e5ecbaaf33bd751a1ac728d45e6c61296cdc3c01233561f41db66cce314adb31" +
+        "0e3be8250c46f06dceea3a7fa1348057e2f6556ad6b1318a024a838f21af1fde" +
+        "048977eb48f59ffd4924ca1c60902e52f0a089bc76897040e082f93776384864" +
+        "5e0705")
+      val expectedC = "f3ffc7703f9400e52a7dfb4b3d3305d98e993b9f48681273c29650ba32fc76ce" +
+        "48332ea7164d96a4476fb8c531a1186ac0dfc17c98dce87b4da7f011ec48c972" +
+        "71d2c20f9b928fe2270d6fb863d51738b48eeee314a7cc8ab932164548e526ae" +
+        "90224368517acfeabd6bb3732bc0e9da99832b61ca01b6de56244a9e88d5f9b3" +
+        "7973f622a43d14a6599b1f654cb45a74e355a5"
+
+      val c = new Array[Byte](163)
+      Curve25519XSalsa20Poly1305.cryptoBox(c, m, m.length, nonce, pk, sk)
+      toHex(c.drop(16)) shouldBe expectedC
     }
 
   }

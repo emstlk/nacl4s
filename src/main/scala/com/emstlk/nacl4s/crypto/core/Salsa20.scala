@@ -111,7 +111,7 @@ object Salsa20 {
 
         var u = 1
         for (i <- 8 until 16) {
-          u += in(i) & 0xFF
+          u += in(i) & 0xff
           in(i) = u.toByte
           u >>>= 8
         }
@@ -146,7 +146,7 @@ object Salsa20 {
 
         var u = 1
         for (i <- 8 until 16) {
-          u += in(i) & 0xFF
+          u += in(i) & 0xff
           in(i) = u.toByte
           u >>>= 8
         }
