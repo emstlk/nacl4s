@@ -5,10 +5,10 @@ import com.emstlk.nacl4s.crypto.core.Salsa20.rotate
 
 object HSalsa20 {
 
-  val outputbytes = 32
-  val inputbytes = 16
-  val keybytes = 32
-  val constbytes = 16
+  val outputBytes = 32
+  val inputBytes = 16
+  val keyBytes = 32
+  val constBytes = 16
 
   def cryptoCore(out: Array[Byte], in: Array[Byte], k: Array[Byte], c: Array[Byte]) {
     var x0 = loadInt(c, 0)

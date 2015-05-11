@@ -4,10 +4,10 @@ import com.emstlk.nacl4s.crypto.Utils._
 
 object Salsa20 {
 
-  val outputbytes = 64
-  val inputbytes = 16
-  val keybytes = 32
-  val constbytes = 16
+  val outputBytes = 64
+  val inputBytes = 16
+  val keyBytes = 32
+  val constBytes = 16
 
   @inline def rotate(u: Int, c: Int) = (u << c) | (u >>> (32 - c))
 

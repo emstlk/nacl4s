@@ -2,30 +2,30 @@ package com.emstlk.nacl4s.crypto.core
 
 object XSalsa20Poly1305 {
 
-  val keybytes = 32
-  val noncebytes = 24
-  val zerobytes = 32
-  val boxzerobytes = 16
+  val keyBytes = 32
+  val nonceBytes = 24
+  val zeroBytes = 32
+  val boxZeroBytes = 16
 
   def cryptoSecretBox(c: Array[Byte], m: Array[Byte], mlen: Int, n: Array[Byte], k: Array[Byte]) {
-    require(mlen >= 32)
+    require(mlen >= zeroBytes)
 
     XSalsa20.cryptoStreamXor(c, m, mlen, n, k)
-    Poly1305.cryptoOneTimeAuth(c, 16, c, 32, mlen - 32, c)
+    Poly1305.cryptoOneTimeAuth(c, boxZeroBytes, c, zeroBytes, mlen - zeroBytes, c)
 
-    for (i <- 0 until 16) c(i) = 0
+    for (i <- 0 until boxZeroBytes) c(i) = 0
   }
 
   def cryptoSecretBoxOpen(m: Array[Byte], c: Array[Byte], clen: Int, n: Array[Byte], k: Array[Byte]) {
-    require(clen >= 32)
+    require(clen >= zeroBytes)
 
-    val subkey = new Array[Byte](32)
-    XSalsa20.cryptoStream(subkey, 32, n, k)
+    val subkey = new Array[Byte](keyBytes)
+    XSalsa20.cryptoStream(subkey, keyBytes, n, k)
 
-    Poly1305.cryptoOneTimeAuthVerify(c, 16, c, 32, clen - 32, subkey)
+    Poly1305.cryptoOneTimeAuthVerify(c, boxZeroBytes, c, zeroBytes, clen - zeroBytes, subkey)
     XSalsa20.cryptoStreamXor(m, c, clen, n, k)
 
-    for (i <- 0 until 32) m(i) = 0
+    for (i <- 0 until zeroBytes) m(i) = 0
   }
 
 }
