@@ -11,7 +11,7 @@ object Utils {
   lazy val random = new SecureRandom
 
   @inline def checkLength(a: Array[Byte], length: Int) {
-    require(a != null && a.length == length, s"Wrong length, required $length")
+    require(Option(a).exists(_.length == length), s"Wrong length, required $length")
   }
 
   @inline def loadInt(a: Array[Byte], offset: Int): Int = {
@@ -26,28 +26,6 @@ object Utils {
     a(offset + 1) = (value >>> 8).toByte
     a(offset + 2) = (value >>> 16).toByte
     a(offset + 3) = (value >>> 24).toByte
-  }
-
-  @inline def loadLong(in: Array[Byte], offset: Int): Long = {
-    (in(offset).toLong & 0xff) |
-      ((in(offset + 1).toLong & 0xff) << 8) |
-      ((in(offset + 2).toLong & 0xff) << 16) |
-      ((in(offset + 3).toLong & 0xff) << 24) |
-      ((in(offset + 4).toLong & 0xff) << 32) |
-      ((in(offset + 5).toLong & 0xff) << 40) |
-      ((in(offset + 6).toLong & 0xff) << 48) |
-      ((in(offset + 7).toLong & 0xff) << 56)
-  }
-
-  @inline def storeLong(out: Array[Byte], offset: Int, in: Long) {
-    out(offset) = (in & 0xff).toByte
-    out(offset + 1) = ((in >>> 8) & 0xff).toByte
-    out(offset + 2) = ((in >>> 16) & 0xff).toByte
-    out(offset + 3) = ((in >>> 24) & 0xff).toByte
-    out(offset + 4) = ((in >>> 32) & 0xff).toByte
-    out(offset + 5) = ((in >>> 40) & 0xff).toByte
-    out(offset + 6) = ((in >>> 48) & 0xff).toByte
-    out(offset + 7) = ((in >>> 56) & 0xff).toByte
   }
 
   def toHex(a: Array[Byte]) = a.map("%02x" format _).mkString

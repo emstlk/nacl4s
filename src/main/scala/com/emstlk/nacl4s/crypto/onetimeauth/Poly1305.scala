@@ -7,12 +7,12 @@ object Poly1305 {
 
   val blockSize = 16
 
-  case class State(r: Array[Int] = new Array[Int](5),
-                   h: Array[Int] = new Array[Int](5),
-                   pad: Array[Int] = new Array[Int](4),
-                   var leftover: Int = 0,
-                   buffer: Array[Byte] = new Array[Byte](blockSize),
-                   var fin: Byte = 0)
+  final case class State(r: Array[Int],
+                         h: Array[Int],
+                         pad: Array[Int],
+                         var leftover: Int,
+                         buffer: Array[Byte],
+                         var fin: Byte)
 
   def init(st: State, k: Array[Byte]) {
     st.r(0) = loadInt(k, 0) & 0x3ffffff
@@ -231,7 +231,7 @@ object Poly1305 {
   }
 
   def cryptoOneTimeAuth(out: Array[Byte], outOffset: Int, m: Array[Byte], mOffset: Int, mLength: Int, key: Array[Byte]) {
-    val state = State()
+    val state = State(new Array[Int](5), new Array[Int](5), new Array[Int](4), 0, new Array[Byte](blockSize), 0)
     init(state, key)
     update(state, m, mOffset, mLength)
     finish(state, out, outOffset)

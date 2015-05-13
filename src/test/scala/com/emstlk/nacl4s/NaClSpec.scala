@@ -3,6 +3,7 @@ package com.emstlk.nacl4s
 import com.emstlk.nacl4s.crypto.Utils._
 import com.emstlk.nacl4s.crypto.box.Curve25519XSalsa20Poly1305
 import com.emstlk.nacl4s.crypto.core._
+import com.emstlk.nacl4s.crypto.hash.Sha512
 import com.emstlk.nacl4s.crypto.onetimeauth.Poly1305
 import com.emstlk.nacl4s.crypto.scalarmult.Curve25519
 import com.emstlk.nacl4s.crypto.secretbox.XSalsa20Poly1305
@@ -11,22 +12,6 @@ import com.emstlk.nacl4s.crypto.verify.Verify16
 import org.scalatest._
 
 class NaClSpec extends FunSpec with Matchers {
-
-  describe("Utils") {
-
-    it("store and load Int") {
-      val arr = new Array[Byte](4)
-      storeInt(arr, 0, Int.MinValue)
-      loadInt(arr, 0) shouldBe Int.MinValue
-    }
-
-    it("store and load Long") {
-      val arr = new Array[Byte](8)
-      storeLong(arr, 0, Long.MinValue)
-      loadLong(arr, 0) shouldBe Long.MinValue
-    }
-
-  }
 
   describe("Salsa20") {
 
@@ -439,6 +424,25 @@ class NaClSpec extends FunSpec with Matchers {
           cryptoBoxOpen(m2, c, length + zeroBytes, n, alicepk, bobsk)
         }
       }
+    }
+
+  }
+
+  describe("Sha512") {
+
+    import Sha512._
+
+    it("first case") {
+      val x = "testing\n".getBytes
+      val x2 = ("The Conscience of a Hacker is a small essay written January 8, 1986 by a computer security hacker " +
+        "who went by the handle of The Mentor, who belonged to the 2nd generation of Legion of Doom.").getBytes
+      val hash = new Array[Byte](bytes)
+      //24f950aac7b9ea9b3cb728228a0c82b67c39e96b4b344798870d5daee93e3ae5931baae8c7cacfea4b629452c38026a81d138bc7aad1af3ef7bfd5ec646d6c28
+      crypto_hash(hash, x, x.length)
+      println(toHex(hash))
+      //a77abe1ccf8f5497e228fbc0acd73a521ededb21b89726684a6ebbc3baa32361aca5a244daa84f24bf19c68baf78e6907625a659b15479eb7bd426fc62aafa73
+      crypto_hash(hash, x2, x2.length)
+      println(toHex(hash))
     }
 
   }
