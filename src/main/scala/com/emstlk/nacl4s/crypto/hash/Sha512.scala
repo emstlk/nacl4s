@@ -28,38 +28,40 @@ object Sha512 {
     out(offset) = ((in >>> 56) & 0xff).toByte
   }
 
-  @inline def rotr(x: Long, n: Int) = (x >>> n) | (x << (64 - n))
-
-  def S0(x: Long) = rotr(x, 28) ^ rotr(x, 34) ^ rotr(x, 39)
-  def S1(x: Long) = rotr(x, 14) ^ rotr(x, 18) ^ rotr(x, 41)
-
-  def s0(x: Long) = rotr(x, 1) ^ rotr(x, 8) ^ (x >>> 7)
-  def s1(x: Long) = rotr(x, 19) ^ rotr(x, 61) ^ (x >>> 6)
-
   def sha512Transform(state: Array[Long], block: Array[Byte], offset: Int) {
     val w = new Array[Long](80)
     val s = new Array[Long](8)
 
     var t0, t1 = 0L
 
-    @inline def rnd(i: Int, k: Long) {
-      @inline def doRnd(a: Long, b: Long, c: Long, e: Long, f: Long, g: Long) {
-        t0 = s((87 - i) % 8) + S1(e) + ((e & (f ^ g)) ^ g) + w(i) + k
-        t1 = S0(a) + ((a & (b | c)) | (b & c))
-        s((83 - i) % 8) += t0
-        s((87 - i) % 8) = t0 + t1
-      }
+    @inline def rotr(x: Long, n: Int) = (x >>> n) | (x << (64 - n))
 
-      doRnd(s((80 - i) % 8), s((81 - i) % 8),
-        s((82 - i) % 8), s((84 - i) % 8),
-        s((85 - i) % 8), s((86 - i) % 8))
+    @inline def rnd(i: Int, k: Long) {
+      val a = s((80 - i) % 8)
+      val b = s((81 - i) % 8)
+      val c = s((82 - i) % 8)
+      val e = s((84 - i) % 8)
+      val g = s((86 - i) % 8)
+
+      t0 = s((87 - i) % 8) +
+        (rotr(e, 14) ^ rotr(e, 18) ^ rotr(e, 41)) +
+        ((e & (s((85 - i) % 8) ^ g)) ^ g) +
+        w(i) + k
+      t1 = (rotr(a, 28) ^ rotr(a, 34) ^ rotr(a, 39)) +
+        ((a & (b | c)) | (b & c))
+      s((83 - i) % 8) += t0
+      s((87 - i) % 8) = t0 + t1
     }
 
     for (i <- 0 until 16)
       w(i) = loadLong(block, offset + i * 8)
 
-    for (i <- 16 until 80)
-      w(i) = s1(w(i - 2)) + w(i - 7) + s0(w(i - 15)) + w(i - 16)
+    for (i <- 16 until 80) {
+      val a = w(i - 2)
+      val b = w(i - 15)
+      w(i) = (rotr(a, 19) ^ rotr(a, 61) ^ (a >>> 6)) + w(i - 7) +
+        (rotr(b, 1) ^ rotr(b, 8) ^ (b >>> 7)) + w(i - 16)
+    }
 
     Array.copy(state, 0, s, 0, 8)
 
@@ -182,8 +184,8 @@ object Sha512 {
     val r = (st.count(1) >>> 3) & 0x7f
 
     val bitLen = new Array[Long](2)
-    bitLen(0) = length << 3
-    bitLen(1) = length >>> 61
+    bitLen(0) = length >>> 61
+    bitLen(1) = length << 3
 
     st.count(1) += bitLen(1)
     if (st.count(1) < bitLen(1)) st.count(0) += 1
@@ -200,7 +202,7 @@ object Sha512 {
         sha512Transform(st.state, in, pos)
         pos += 128
       }
-      Array.copy(in, 0, st.buf, 0, (length - pos).toInt)
+      Array.copy(in, pos, st.buf, 0, (length - pos).toInt)
     }
   }
 

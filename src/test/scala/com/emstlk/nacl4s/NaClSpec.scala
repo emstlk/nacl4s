@@ -437,12 +437,15 @@ class NaClSpec extends FunSpec with Matchers {
       val x2 = ("The Conscience of a Hacker is a small essay written January 8, 1986 by a computer security hacker " +
         "who went by the handle of The Mentor, who belonged to the 2nd generation of Legion of Doom.").getBytes
       val hash = new Array[Byte](bytes)
-      //24f950aac7b9ea9b3cb728228a0c82b67c39e96b4b344798870d5daee93e3ae5931baae8c7cacfea4b629452c38026a81d138bc7aad1af3ef7bfd5ec646d6c28
+      val expectedHashX = "24f950aac7b9ea9b3cb728228a0c82b67c39e96b4b344798870d5daee93e3ae5" +
+        "931baae8c7cacfea4b629452c38026a81d138bc7aad1af3ef7bfd5ec646d6c28"
+      val expectedHashX2 = "a77abe1ccf8f5497e228fbc0acd73a521ededb21b89726684a6ebbc3baa32361" +
+        "aca5a244daa84f24bf19c68baf78e6907625a659b15479eb7bd426fc62aafa73"
       crypto_hash(hash, x, x.length)
-      println(toHex(hash))
-      //a77abe1ccf8f5497e228fbc0acd73a521ededb21b89726684a6ebbc3baa32361aca5a244daa84f24bf19c68baf78e6907625a659b15479eb7bd426fc62aafa73
+      toHex(hash) shouldBe expectedHashX
+
       crypto_hash(hash, x2, x2.length)
-      println(toHex(hash))
+      toHex(hash) shouldBe expectedHashX2
     }
 
   }
