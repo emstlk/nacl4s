@@ -4,7 +4,7 @@
 
 ## Overview (work in progress)
 
-### Already implemented
+Already implemented
 - Salsa20
 - HSalsa20
 - XSalsa20
