@@ -353,6 +353,151 @@ object Ge {
     for (i <- 0 to 9) f(i) = f(i) ^ ((f(i) ^ g(i)) & nb)
   }
 
+  def feInvert(out: Array[Int], z: Array[Int]) {
+    val t0 = new Array[Int](10)
+    val t1 = new Array[Int](10)
+    val t2 = new Array[Int](10)
+    val t3 = new Array[Int](10)
+
+    // pow225521
+    feSq(t0, z, false)
+    feSq(t1, t0, false)
+    feSq(t1, t1, false)
+    feMul(t1, z, t1)
+    feMul(t0, t0, t1)
+    feSq(t2, t0, false)
+
+    feMul(t1, t1, t2)
+    feSq(t2, t1, false)
+    for (i <- 1 until 5) feSq(t2, t2, false)
+
+    feMul(t1, t2, t1)
+    feSq(t2, t1, false)
+    for (i <- 1 until 10) feSq(t2, t2, false)
+
+    feMul(t2, t2, t1)
+    feSq(t3, t2, false)
+    for (i <- 1 until 20) feSq(t3, t3, false)
+
+    feMul(t2, t3, t2)
+    feSq(t2, t2, false)
+    for (i <- 1 until 10) feSq(t2, t2, false)
+
+    feMul(t1, t2, t1)
+    feSq(t2, t1, false)
+    for (i <- 1 until 50) feSq(t2, t2, false)
+
+    feMul(t2, t2, t1)
+    feSq(t3, t2, false)
+    for (i <- 1 until 100) feSq(t3, t3, false)
+
+    feMul(t2, t3, t2)
+    feSq(t2, t2, false)
+    for (i <- 1 until 50) feSq(t2, t2, false)
+
+    feMul(t1, t2, t1)
+    feSq(t1, t1, false)
+    for (i <- 1 until 5) feSq(t1, t1, false)
+
+    feMul(out, t1, t0)
+  }
+
+  def feToBytes(s: Array[Byte], h: Array[Int]) {
+    var h0 = h(0)
+    var h1 = h(1)
+    var h2 = h(2)
+    var h3 = h(3)
+    var h4 = h(4)
+    var h5 = h(5)
+    var h6 = h(6)
+    var h7 = h(7)
+    var h8 = h(8)
+    var h9 = h(9)
+
+    var q = (19 * h9 + (1 << 24)) >> 25
+    q = (h0 + q) >> 26
+    q = (h1 + q) >> 25
+    q = (h2 + q) >> 26
+    q = (h3 + q) >> 25
+    q = (h4 + q) >> 26
+    q = (h5 + q) >> 25
+    q = (h6 + q) >> 26
+    q = (h7 + q) >> 25
+    q = (h8 + q) >> 26
+    q = (h9 + q) >> 25
+
+    h0 += 19 * q
+
+    val carry0 = h0 >> 26
+    h1 += carry0
+    h0 -= carry0 << 26
+    val carry1 = h1 >> 25
+    h2 += carry1
+    h1 -= carry1 << 25
+    val carry2 = h2 >> 26
+    h3 += carry2
+    h2 -= carry2 << 26
+    val carry3 = h3 >> 25
+    h4 += carry3
+    h3 -= carry3 << 25
+    val carry4 = h4 >> 26
+    h5 += carry4
+    h4 -= carry4 << 26
+    val carry5 = h5 >> 25
+    h6 += carry5
+    h5 -= carry5 << 25
+    val carry6 = h6 >> 26
+    h7 += carry6
+    h6 -= carry6 << 26
+    val carry7 = h7 >> 25
+    h8 += carry7
+    h7 -= carry7 << 25
+    val carry8 = h8 >> 26
+    h9 += carry8
+    h8 -= carry8 << 26
+    val carry9 = h9 >> 25
+    h9 -= carry9 << 25
+
+    s(0) = h0.toByte
+    s(1) = (h0 >>> 8).toByte
+    s(2) = (h0 >>> 16).toByte
+    s(3) = ((h0 >>> 24) | (h1 << 2)).toByte
+    s(4) = (h1 >>> 6).toByte
+    s(5) = (h1 >>> 14).toByte
+    s(6) = ((h1 >>> 22) | (h2 << 3)).toByte
+    s(7) = (h2 >>> 5).toByte
+    s(8) = (h2 >>> 13).toByte
+    s(9) = ((h2 >>> 21) | (h3 << 5)).toByte
+    s(10) = (h3 >>> 3).toByte
+    s(11) = (h3 >>> 11).toByte
+    s(12) = ((h3 >>> 19) | (h4 << 6)).toByte
+    s(13) = (h4 >>> 2).toByte
+    s(14) = (h4 >>> 10).toByte
+    s(15) = (h4 >>> 18).toByte
+    s(16) = h5.toByte
+    s(17) = (h5 >>> 8).toByte
+    s(18) = (h5 >>> 16).toByte
+    s(19) = ((h5 >>> 24) | (h6 << 1)).toByte
+    s(20) = (h6 >>> 7).toByte
+    s(21) = (h6 >>> 15).toByte
+    s(22) = ((h6 >>> 23) | (h7 << 3)).toByte
+    s(23) = (h7 >>> 5).toByte
+    s(24) = (h7 >>> 13).toByte
+    s(25) = ((h7 >>> 21) | (h8 << 4)).toByte
+    s(26) = (h8 >>> 4).toByte
+    s(27) = (h8 >>> 12).toByte
+    s(28) = ((h8 >>> 20) | (h9 << 6)).toByte
+    s(29) = (h9 >>> 2).toByte
+    s(30) = (h9 >>> 10).toByte
+    s(31) = (h9 >>> 18).toByte
+  }
+
+  def feIsNegative(f: Array[Int]): Int = {
+    val s = new Array[Byte](32)
+    feToBytes(s, f)
+    s(0) & 1
+  }
+
   def cmov(t: Precomp, u: Precomp, b: Int) {
     feCmov(t.yplusx, u.yplusx, b)
     feCmov(t.yminusx, u.yminusx, b)
@@ -439,6 +584,18 @@ object Ge {
     feMul(r.y, p.y, p.z)
     feMul(r.z, p.z, p.t)
     feMul(r.t, p.x, p.y)
+  }
+
+  def p3ToBytes(s: Array[Byte], h: P3) {
+    val recip = new Array[Int](10)
+    val x = new Array[Int](10)
+    val y = new Array[Int](10)
+
+    feInvert(recip, h.z)
+    feMul(x, h.x, recip)
+    feMul(y, h.y, recip)
+    feToBytes(s, y)
+    s(31) = (s(31) ^ (feIsNegative(x) << 7)).toByte
   }
 
   def scalarmultBase(h: P3, a: Array[Byte]) {

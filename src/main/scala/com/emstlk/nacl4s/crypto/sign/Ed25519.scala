@@ -10,7 +10,7 @@ object Ed25519 {
   val publicKeyBytes = 32
   val secretKeyBytes = 64
 
-  def cryptoSignDetached(sig: Array[Byte], sigLength: Int, m: Array[Byte], mLength: Int, sk: Array[Byte]) {
+  def cryptoSignDetached(sig: Array[Byte], m: Array[Byte], mOffset: Int, mLength: Int, sk: Array[Byte]) {
     val az = new Array[Byte](64)
     val nonce = new Array[Byte](64)
     val hram = new Array[Byte](64)
@@ -21,18 +21,29 @@ object Ed25519 {
 
     Array.copy(sk, 32, sig, 32, 32)
 
-    val st = State()
-    Sha512.init(st)
-    Sha512.update(st, az, 32, 32)
-    Sha512.update(st, m, 0, mLength)
-    Sha512.finish(st, nonce)
+    val hs = State()
+    Sha512.init(hs)
+    Sha512.update(hs, az, 32, 32)
+    Sha512.update(hs, m, mOffset, mLength)
+    Sha512.finish(hs, nonce)
 
     val r = new P3
     Sc.reduce(nonce)
     Ge.scalarmultBase(r, nonce)
-    // ge_p3_tobytes(sig, &R);
+    Ge.p3ToBytes(sig, r)
 
+    Sha512.init(hs)
+    Sha512.update(hs, sig, 0, 64)
+    Sha512.update(hs, m, mOffset, mLength)
+    Sha512.finish(hs, hram)
 
+    Sc.reduce(hram)
+    Sc.muladd(sig, 32, hram, az, nonce)
+  }
+
+  def cryptoSign(sm: Array[Byte], m: Array[Byte], mLength: Int, sk: Array[Byte]) {
+    Array.copy(m, 0, sm, bytes, mLength)
+    cryptoSignDetached(sm, sm, bytes, mLength, sk)
   }
 
 }

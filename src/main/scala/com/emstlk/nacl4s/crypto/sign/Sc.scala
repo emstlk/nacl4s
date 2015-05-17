@@ -306,7 +306,7 @@ object Sc {
     s(18) = ((s6 >>> 18) | (s7 << 3)).toByte
     s(19) = (s7 >>> 5).toByte
     s(20) = (s7 >>> 13).toByte
-    s(21) = (s8 >>> 0).toByte
+    s(21) = s8.toByte
     s(22) = (s8 >>> 8).toByte
     s(23) = ((s8 >>> 16) | (s9 << 5)).toByte
     s(24) = (s9 >>> 3).toByte
@@ -319,7 +319,7 @@ object Sc {
     s(31) = (s11 >>> 17).toByte
   }
 
-  def muladd(s: Array[Byte], a: Array[Byte], b: Array[Byte], c: Array[Byte]) {
+  def muladd(s: Array[Byte], sOffset: Int, a: Array[Byte], b: Array[Byte], c: Array[Byte]) {
     val a0 = 2097151 & load3(a, 0)
     val a1 = 2097151 & (load4(a, 2) >>> 5)
     val a2 = 2097151 & (load3(a, 5) >>> 2)
@@ -697,38 +697,38 @@ object Sc {
     s11 += carry10
     s10 -= carry10 << 21
 
-    s(0) = (s0 >>> 0).toByte
-    s(1) = (s0 >>> 8).toByte
-    s(2) = ((s0 >>> 16) | (s1 << 5)).toByte
-    s(3) = (s1 >>> 3).toByte
-    s(4) = (s1 >>> 11).toByte
-    s(5) = ((s1 >>> 19) | (s2 << 2)).toByte
-    s(6) = (s2 >>> 6).toByte
-    s(7) = ((s2 >>> 14) | (s3 << 7)).toByte
-    s(8) = (s3 >>> 1).toByte
-    s(9) = (s3 >>> 9).toByte
-    s(10) = ((s3 >>> 17) | (s4 << 4)).toByte
-    s(11) = (s4 >>> 4).toByte
-    s(12) = (s4 >>> 12).toByte
-    s(13) = ((s4 >>> 20) | (s5 << 1)).toByte
-    s(14) = (s5 >>> 7).toByte
-    s(15) = ((s5 >>> 15) | (s6 << 6)).toByte
-    s(16) = (s6 >>> 2).toByte
-    s(17) = (s6 >>> 10).toByte
-    s(18) = ((s6 >>> 18) | (s7 << 3)).toByte
-    s(19) = (s7 >>> 5).toByte
-    s(20) = (s7 >>> 13).toByte
-    s(21) = (s8 >>> 0).toByte
-    s(22) = (s8 >>> 8).toByte
-    s(23) = ((s8 >>> 16) | (s9 << 5)).toByte
-    s(24) = (s9 >>> 3).toByte
-    s(25) = (s9 >>> 11).toByte
-    s(26) = ((s9 >>> 19) | (s10 << 2)).toByte
-    s(27) = (s10 >>> 6).toByte
-    s(28) = ((s10 >>> 14) | (s11 << 7)).toByte
-    s(29) = (s11 >>> 1).toByte
-    s(30) = (s11 >>> 9).toByte
-    s(31) = (s11 >>> 17).toByte
+    s(sOffset) = s0.toByte
+    s(sOffset + 1) = (s0 >>> 8).toByte
+    s(sOffset + 2) = ((s0 >>> 16) | (s1 << 5)).toByte
+    s(sOffset + 3) = (s1 >>> 3).toByte
+    s(sOffset + 4) = (s1 >>> 11).toByte
+    s(sOffset + 5) = ((s1 >>> 19) | (s2 << 2)).toByte
+    s(sOffset + 6) = (s2 >>> 6).toByte
+    s(sOffset + 7) = ((s2 >>> 14) | (s3 << 7)).toByte
+    s(sOffset + 8) = (s3 >>> 1).toByte
+    s(sOffset + 9) = (s3 >>> 9).toByte
+    s(sOffset + 10) = ((s3 >>> 17) | (s4 << 4)).toByte
+    s(sOffset + 11) = (s4 >>> 4).toByte
+    s(sOffset + 12) = (s4 >>> 12).toByte
+    s(sOffset + 13) = ((s4 >>> 20) | (s5 << 1)).toByte
+    s(sOffset + 14) = (s5 >>> 7).toByte
+    s(sOffset + 15) = ((s5 >>> 15) | (s6 << 6)).toByte
+    s(sOffset + 16) = (s6 >>> 2).toByte
+    s(sOffset + 17) = (s6 >>> 10).toByte
+    s(sOffset + 18) = ((s6 >>> 18) | (s7 << 3)).toByte
+    s(sOffset + 19) = (s7 >>> 5).toByte
+    s(sOffset + 20) = (s7 >>> 13).toByte
+    s(sOffset + 21) = s8.toByte
+    s(sOffset + 22) = (s8 >>> 8).toByte
+    s(sOffset + 23) = ((s8 >>> 16) | (s9 << 5)).toByte
+    s(sOffset + 24) = (s9 >>> 3).toByte
+    s(sOffset + 25) = (s9 >>> 11).toByte
+    s(sOffset + 26) = ((s9 >>> 19) | (s10 << 2)).toByte
+    s(sOffset + 27) = (s10 >>> 6).toByte
+    s(sOffset + 28) = ((s10 >>> 14) | (s11 << 7)).toByte
+    s(sOffset + 29) = (s11 >>> 1).toByte
+    s(sOffset + 30) = (s11 >>> 9).toByte
+    s(sOffset + 31) = (s11 >>> 17).toByte
   }
 
 }
