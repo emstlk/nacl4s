@@ -4,7 +4,9 @@ object Sha512 {
 
   val bytes = 64
 
-  final case class State(state: Array[Long], count: Array[Long], buf: Array[Byte])
+  final case class State(state: Array[Long] = new Array[Long](8),
+                         count: Array[Long] = new Array[Long](2),
+                         buf: Array[Byte] = new Array[Byte](128))
 
   @inline def loadLong(in: Array[Byte], offset: Int): Long = {
     (in(offset + 7).toLong & 0xff) |
@@ -165,8 +167,8 @@ object Sha512 {
     val r = (st.count(1) >>> 3) & 0x7f
     val plen = if (r < 112) 112 - r else 240 - r
 
-    update(st, pad, plen)
-    update(st, len, 16)
+    update(st, pad, 0, plen)
+    update(st, len, 0, 16)
   }
 
   def init(st: State) {
@@ -180,7 +182,7 @@ object Sha512 {
     st.state(7) = 0x5be0cd19137e2179L
   }
 
-  def update(st: State, in: Array[Byte], length: Long) {
+  def update(st: State, in: Array[Byte], offset: Int, length: Long) {
     val r = (st.count(1) >>> 3) & 0x7f
 
     val bitLen = new Array[Long](2)
@@ -192,17 +194,17 @@ object Sha512 {
 
     st.count(0) += bitLen(0)
 
-    if (length < 128 - r) Array.copy(in, 0, st.buf, r.toInt, length.toInt)
+    if (length < 128 - r) Array.copy(in, offset, st.buf, r.toInt, length.toInt)
     else {
-      Array.copy(in, 0, st.buf, r.toInt, (128 - r).toInt)
+      Array.copy(in, offset, st.buf, r.toInt, (128 - r).toInt)
       sha512Transform(st.state, st.buf, 0)
 
       var pos = (128 - r).toInt
       while (length - pos >= 128) {
-        sha512Transform(st.state, in, pos)
+        sha512Transform(st.state, in, offset + pos)
         pos += 128
       }
-      Array.copy(in, pos, st.buf, 0, (length - pos).toInt)
+      Array.copy(in, offset + pos, st.buf, 0, (length - pos).toInt)
     }
   }
 
@@ -213,10 +215,10 @@ object Sha512 {
     }
   }
 
-  def crypto_hash(out: Array[Byte], in: Array[Byte], length: Long) {
-    val st = State(new Array[Long](8), new Array[Long](2), new Array[Byte](128))
+  def cryptoHash(out: Array[Byte], in: Array[Byte], length: Long) {
+    val st = State()
     init(st)
-    update(st, in, length)
+    update(st, in, 0, length)
     finish(st, out)
   }
 
