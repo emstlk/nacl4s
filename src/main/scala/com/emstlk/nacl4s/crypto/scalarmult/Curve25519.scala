@@ -144,7 +144,8 @@ object Curve25519 {
     var r3 = BigInt(in(3))
     var r4 = BigInt(in(4))
 
-    for (_ <- 1 to count) {
+    var i = 0
+    while (i < count) {
       val d0 = r0 * 2
       val d1 = r1 * 2
       val d2 = r2 * 2 * 19
@@ -182,6 +183,7 @@ object Curve25519 {
       r1 = r1 & 0x7ffffffffffffL
 
       r2 += c
+      i += 1
     }
 
     out(0) = r0.toLong
@@ -296,10 +298,12 @@ object Curve25519 {
   }
 
   @inline def swapConditional(a: Array[Long], b: Array[Long]) {
-    for (i <- 0 until 5) {
+    var i = 0
+    while (i < 5) {
       val x = a(i)
       a(i) = b(i)
       b(i) = x
+      i += 1
     }
   }
 
@@ -321,10 +325,12 @@ object Curve25519 {
     var nqpqz2 = new Array[Long](5)
     nqpqz2(0) = 1
 
-    for (i <- 0 until 32) {
+    var i = 0
+    while (i < 32) {
       var byte = n(31 - i)
 
-      for (j <- 0 until 8) {
+      var j = 0
+      while (j < 8) {
         val swapNeeded = (byte >>> 7 & 1) == 1
 
         if (swapNeeded) {
@@ -356,7 +362,9 @@ object Curve25519 {
         nqpqz2 = t
 
         byte = (byte << 1).toByte
+        j += 1
       }
+      i += 1
     }
 
     Array.copy(nqx, 0, resultx, 0, 5)
@@ -398,7 +406,11 @@ object Curve25519 {
   def cryptoScalarmult(public: Array[Byte], secret: Array[Byte], basepoint: Array[Byte]) {
     val e = new Array[Byte](32)
 
-    for (i <- 0 until 32) e(i) = secret(i)
+    var i = 0
+    while (i < 32) {
+      e(i) = secret(i)
+      i += 1
+    }
     e(0) = (e(0) & 248).toByte
     e(31) = (e(31) & 127).toByte
     e(31) = (e(31) | 64).toByte

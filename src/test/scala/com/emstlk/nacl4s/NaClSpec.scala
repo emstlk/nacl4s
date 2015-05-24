@@ -181,7 +181,8 @@ class NaClSpec extends FunSpec with Matchers {
       val c = new Array[Byte](10000)
       val a = new Array[Byte](16)
 
-      for (length <- 0 until 10000) {
+      var length = 0
+      while (length < 10000) {
         random.nextBytes(key)
         random.nextBytes(c)
 
@@ -203,6 +204,7 @@ class NaClSpec extends FunSpec with Matchers {
             cryptoOneTimeAuthVerify(a, 0, c, 0, length, key)
           }
         }
+        length += 1
       }
     }
 
@@ -332,11 +334,16 @@ class NaClSpec extends FunSpec with Matchers {
       val c = new Array[Byte](10000)
       val m2 = new Array[Byte](10000)
 
-      for (length <- 0 until 1000) {
+      var length = 0
+      while (length < 1000) {
         random.nextBytes(k)
         random.nextBytes(n)
         random.nextBytes(m)
-        for (i <- 0 until zeroBytes) m(i) = 0
+        var i = 0
+        while (i < zeroBytes) {
+          m(i) = 0
+          i += 1
+        }
         cryptoSecretBox(c, m, length + zeroBytes, n, k)
 
         cryptoSecretBoxOpen(m2, c, length + zeroBytes, n, k)
@@ -347,6 +354,7 @@ class NaClSpec extends FunSpec with Matchers {
         the[RuntimeException] thrownBy {
           cryptoSecretBoxOpen(m2, c, length + zeroBytes, n, k)
         }
+        length += 1
       }
     }
 
@@ -408,12 +416,17 @@ class NaClSpec extends FunSpec with Matchers {
       val c = new Array[Byte](10000)
       val m2 = new Array[Byte](10000)
 
-      for (length <- 0 until 1000) {
+      var length = 0
+      while (length < 1000) {
         cryptoBoxKeypair(alicepk, alicesk)
         cryptoBoxKeypair(bobpk, bobsk)
         random.nextBytes(n)
         random.nextBytes(m)
-        for (i <- 0 until zeroBytes) m(i) = 0
+        var i = 0
+        while (i < zeroBytes) {
+          m(i) = 0
+          i += 1
+        }
         cryptoBox(c, m, length + zeroBytes, n, bobpk, alicesk)
 
         cryptoBoxOpen(m2, c, length + zeroBytes, n, alicepk, bobsk)
@@ -424,6 +437,7 @@ class NaClSpec extends FunSpec with Matchers {
         the[RuntimeException] thrownBy {
           cryptoBoxOpen(m2, c, length + zeroBytes, n, alicepk, bobsk)
         }
+        length += 1
       }
     }
 

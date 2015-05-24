@@ -16,7 +16,11 @@ object XSalsa20Poly1305 {
     XSalsa20.cryptoStreamXor(c, m, mlen, n, k)
     Poly1305.cryptoOneTimeAuth(c, boxZeroBytes, c, zeroBytes, mlen - zeroBytes, c)
 
-    for (i <- 0 until boxZeroBytes) c(i) = 0
+    var i = 0
+    while (i < boxZeroBytes) {
+      c(i) = 0
+      i += 1
+    }
   }
 
   def cryptoSecretBoxOpen(m: Array[Byte], c: Array[Byte], clen: Int, n: Array[Byte], k: Array[Byte]) {
@@ -28,7 +32,11 @@ object XSalsa20Poly1305 {
     Poly1305.cryptoOneTimeAuthVerify(c, boxZeroBytes, c, zeroBytes, clen - zeroBytes, subkey)
     XSalsa20.cryptoStreamXor(m, c, clen, n, k)
 
-    for (i <- 0 until zeroBytes) m(i) = 0
+    var i = 0
+    while (i < zeroBytes) {
+      m(i) = 0
+      i += 1
+    }
   }
 
 }

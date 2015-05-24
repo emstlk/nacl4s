@@ -9,11 +9,19 @@ object Ge {
     (b.toLong >>> 63).toByte
 
   @inline def feAdd(h: Array[Int], f: Array[Int], g: Array[Int]) {
-    for (i <- 0 to 9) h(i) = f(i) + g(i)
+    var i = 0
+    while (i <= 9) {
+      h(i) = f(i) + g(i)
+      i += 1
+    }
   }
 
   @inline def feSub(h: Array[Int], f: Array[Int], g: Array[Int]) {
-    for (i <- 0 to 9) h(i) = f(i) - g(i)
+    var i = 0
+    while (i <= 9) {
+      h(i) = f(i) - g(i)
+      i += 1
+    }
   }
 
   def feMul(h: Array[Int], f: Array[Int], g: Array[Int]) {
@@ -350,7 +358,11 @@ object Ge {
 
   @inline def feCmov(f: Array[Int], g: Array[Int], b: Int) {
     val nb = -b
-    for (i <- 0 to 9) f(i) = f(i) ^ ((f(i) ^ g(i)) & nb)
+    var i = 0
+    while (i <= 9) {
+      f(i) = f(i) ^ ((f(i) ^ g(i)) & nb)
+      i += 1
+    }
   }
 
   def feInvert(out: Array[Int], z: Array[Int]) {
@@ -369,35 +381,67 @@ object Ge {
 
     feMul(t1, t1, t2)
     feSq(t2, t1, false)
-    for (i <- 1 until 5) feSq(t2, t2, false)
+    var i = 1
+    while (i < 5) {
+      feSq(t2, t2, false)
+      i += 1
+    }
 
     feMul(t1, t2, t1)
     feSq(t2, t1, false)
-    for (i <- 1 until 10) feSq(t2, t2, false)
+    i = 1
+    while (i < 10) {
+      feSq(t2, t2, false)
+      i += 1
+    }
 
     feMul(t2, t2, t1)
     feSq(t3, t2, false)
-    for (i <- 1 until 20) feSq(t3, t3, false)
+    i = 1
+    while (i < 20) {
+      feSq(t3, t3, false)
+      i += 1
+    }
 
     feMul(t2, t3, t2)
     feSq(t2, t2, false)
-    for (i <- 1 until 10) feSq(t2, t2, false)
+    i = 1
+    while (i < 10) {
+      feSq(t2, t2, false)
+      i += 1
+    }
 
     feMul(t1, t2, t1)
     feSq(t2, t1, false)
-    for (i <- 1 until 50) feSq(t2, t2, false)
+    i = 1
+    while (i < 50) {
+      feSq(t2, t2, false)
+      i += 1
+    }
 
     feMul(t2, t2, t1)
     feSq(t3, t2, false)
-    for (i <- 1 until 100) feSq(t3, t3, false)
+    i = 1
+    while (i < 100) {
+      feSq(t3, t3, false)
+      i += 1
+    }
 
     feMul(t2, t3, t2)
     feSq(t2, t2, false)
-    for (i <- 1 until 50) feSq(t2, t2, false)
+    i = 1
+    while (i < 50) {
+      feSq(t2, t2, false)
+      i += 1
+    }
 
     feMul(t1, t2, t1)
     feSq(t1, t1, false)
-    for (i <- 1 until 5) feSq(t1, t1, false)
+    i = 1
+    while (i < 5) {
+      feSq(t1, t1, false)
+      i += 1
+    }
 
     feMul(out, t1, t0)
   }
@@ -534,10 +578,12 @@ object Ge {
     t.yplusx(0) = 1
     t.yminusx(0) = 1
     t.xy2d(0) = 0
-    for (i <- 1 to 9) {
+    var i = 1
+    while (i <= 9) {
       t.yplusx(i) = 0
       t.yminusx(i) = 0
       t.xy2d(i) = 0
+      i += 1
     }
 
     cmov(t, Base.base(pos)(0), equal(babs, 1))
@@ -552,7 +598,11 @@ object Ge {
     val minust = new Precomp
     Array.copy(t.yminusx, 0, minust.yplusx, 0, 10)
     Array.copy(t.yplusx, 0, minust.yminusx, 0, 10)
-    for (i <- 0 to 9) minust.xy2d(i) = -t.xy2d(i)
+    i = 0
+    while (i <= 9) {
+      minust.xy2d(i) = -t.xy2d(i)
+      i += 1
+    }
     cmov(t, minust, bNegative)
   }
 
@@ -601,16 +651,20 @@ object Ge {
   def scalarmultBase(h: P3, a: Array[Byte]) {
     val e = new Array[Byte](64)
 
-    for (i <- 0 until 32) {
+    var i = 0
+    while (i < 32) {
       e(2 * i) = (a(i) & 15).toByte
       e(2 * i + 1) = ((a(i) >>> 4) & 15).toByte
+      i += 1
     }
 
     var carry: Byte = 0
-    for (i <- 0 until 63) {
+    i = 0
+    while (i < 63) {
       e(i) = (e(i) + carry).toByte
       carry = ((e(i) + 8) >> 4).toByte
       e(i) = (e(i) - (carry << 4)).toByte
+      i += 1
     }
     e(63) = (e(63) + carry).toByte
 
@@ -620,10 +674,12 @@ object Ge {
     val t = new Precomp
     val r = new P1p1
 
-    for (i <- 1 until 64 by 2) {
+    i = 1
+    while (i < 64) {
       select(t, i / 2, e(i))
       madd(r, h, t)
       p1p1ToP3(h, r)
+      i += 2
     }
 
     val s = new P2
@@ -636,10 +692,12 @@ object Ge {
     p2Dbl(r, s)
     p1p1ToP3(h, r)
 
-    for (i <- 0 until 64 by 2) {
+    i = 0
+    while (i < 64) {
       select(t, i / 2, e(i))
       madd(r, h, t)
       p1p1ToP3(h, r)
+      i += 2
     }
   }
 

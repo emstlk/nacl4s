@@ -55,14 +55,19 @@ object Sha512 {
       s((87 - i) % 8) = t0 + t1
     }
 
-    for (i <- 0 until 16)
+    var i = 0
+    while (i < 16) {
       w(i) = loadLong(block, offset + i * 8)
+      i += 1
+    }
 
-    for (i <- 16 until 80) {
+    i = 16
+    while (i < 80) {
       val a = w(i - 2)
       val b = w(i - 15)
       w(i) = (rotr(a, 19) ^ rotr(a, 61) ^ (a >>> 6)) + w(i - 7) +
         (rotr(b, 1) ^ rotr(b, 8) ^ (b >>> 7)) + w(i - 16)
+      i += 1
     }
 
     Array.copy(state, 0, s, 0, 8)
@@ -148,8 +153,10 @@ object Sha512 {
     rnd(78, 0x5fcb6fab3ad6faecL)
     rnd(79, 0x6c44198c4a475817L)
 
-    for (i <- 0 until 8) {
+    i = 0
+    while (i < 8) {
       state(i) += s(i)
+      i += 1
     }
   }
 
@@ -210,8 +217,10 @@ object Sha512 {
 
   def finish(st: State, out: Array[Byte]) {
     sha512Pad(st)
-    for (i <- 0 until 8) {
+    var i = 0
+    while (i < 8) {
       storeLong(out, i * 8, st.state(i))
+      i += 1
     }
   }
 

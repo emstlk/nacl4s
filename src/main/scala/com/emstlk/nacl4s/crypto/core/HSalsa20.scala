@@ -28,7 +28,8 @@ object HSalsa20 {
     var x14 = loadInt(k, 28)
     var x15 = loadInt(c, 12)
 
-    for (i <- 20 until 0 by -2) {
+    var i = 20
+    while (i > 0) {
       x4 ^= rotate(x0 + x12, 7)
       x8 ^= rotate(x4 + x0, 9)
       x12 ^= rotate(x8 + x4, 13)
@@ -61,6 +62,7 @@ object HSalsa20 {
       x13 ^= rotate(x12 + x15, 9)
       x14 ^= rotate(x13 + x12, 13)
       x15 ^= rotate(x14 + x13, 18)
+      i -= 2
     }
 
     storeInt(out, 0, x0)

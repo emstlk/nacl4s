@@ -29,7 +29,8 @@ object Salsa20 {
     var j14, x14 = loadInt(k, 28)
     var j15, x15 = loadInt(c, 12)
 
-    for (i <- 20 until 0 by -2) {
+    var i = 20
+    while (i > 0) {
       x4 ^= rotate(x0 + x12, 7)
       x8 ^= rotate(x4 + x0, 9)
       x12 ^= rotate(x8 + x4, 13)
@@ -62,6 +63,7 @@ object Salsa20 {
       x13 ^= rotate(x12 + x15, 9)
       x14 ^= rotate(x13 + x12, 13)
       x15 ^= rotate(x14 + x13, 18)
+      i -= 2
     }
 
     x0 += j0
@@ -110,10 +112,12 @@ object Salsa20 {
         cryptoCore(c, in, k, getSigma)
 
         var u = 1
-        for (i <- 8 until 16) {
+        var i = 8
+        while (i < 16) {
           u += in(i) & 0xff
           in(i) = u.toByte
           u >>>= 8
+          i += 1
         }
 
         coffset += 64
@@ -140,15 +144,19 @@ object Salsa20 {
       while (mlen - moffset >= 64) {
         cryptoCore(block, in, k, getSigma)
 
-        for (i <- 0 until 64) {
+        var i = 0
+        while (i < 64) {
           c(coffset + i) = (m(moffset + i) ^ block(i)).toByte
+          i += 1
         }
 
         var u = 1
-        for (i <- 8 until 16) {
+        i = 8
+        while (i < 16) {
           u += in(i) & 0xff
           in(i) = u.toByte
           u >>>= 8
+          i += 1
         }
 
         coffset += 64
@@ -158,8 +166,10 @@ object Salsa20 {
       if (mlen - moffset != 0) {
         cryptoCore(block, in, k, getSigma)
 
-        for (i <- 0 until (mlen - moffset)) {
+        var i = 0
+        while (i < mlen - moffset) {
           c(coffset + i) = (m(moffset + i) ^ block(i)).toByte
+          i += 1
         }
       }
     }

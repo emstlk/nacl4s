@@ -105,8 +105,10 @@ object Poly1305 {
   def finish(st: State, mac: Array[Byte], offset: Int) {
     if (st.leftover != 0) {
       st.buffer(st.leftover) = 1
-      for (i <- (st.leftover + 1) until blockSize) {
+      var i = st.leftover + 1
+      while (i < blockSize) {
         st.buffer(i) = 0
+        i += 1
       }
       st.fin = 1
       blocks(st, st.buffer, 0, blockSize)
@@ -201,8 +203,10 @@ object Poly1305 {
       var want = blockSize - st.leftover
       if (want > length) want = length
 
-      for (i <- 0 until want) {
+      var i = 0
+      while (i < want) {
         st.buffer(st.leftover + i) = m(pos + i)
+        i += 1
       }
 
       pos += want
@@ -223,8 +227,10 @@ object Poly1305 {
 
     rest = length - (pos - offset)
     if (rest != 0) {
-      for (i <- 0 until rest) {
+      var i = 0
+      while (i < rest) {
         st.buffer(st.leftover + i) = m(pos + i)
+        i += 1
       }
       st.leftover += rest
     }

@@ -6,8 +6,10 @@ object Verify16 {
 
   def cryptoVerify(x: Array[Byte], xOffset: Int, y: Array[Byte]) {
     var differentBits = 0
-    for (i <- 0 until bytes) {
+    var i = 0
+    while (i < bytes) {
       differentBits |= x(xOffset + i) ^ y(i)
+      i += 1
     }
 
     val result = (1 & (((differentBits & 0xff) - 1) >>> 8)) - 1
