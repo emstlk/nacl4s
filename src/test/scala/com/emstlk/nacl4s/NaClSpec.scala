@@ -12,6 +12,8 @@ import com.emstlk.nacl4s.crypto.stream.XSalsa20
 import com.emstlk.nacl4s.crypto.verify.Verify16
 import org.scalatest._
 
+import scala.io.Source
+
 class NaClSpec extends FunSpec with Matchers {
 
   describe("Salsa20") {
@@ -469,14 +471,19 @@ class NaClSpec extends FunSpec with Matchers {
 
     import Ed25519._
 
-    it("first case") {
-      val sk = fromHex("4ccd089b28ff96da9db6c346ec114e0f5b8a319f35aba624da8cf6ed4fb8a6fb")
-      val pk = fromHex("3d4017c3e843895a92b70aa74d1b7ebc9c982ccf2ec4968cc0cd55f12af4660c")
-      val expectedSig = "92a009a9f0d4cab8720e820b5f642540a2b27b5416503f8fb3762223ebdb69da085ac1e43e15996e458f3613d0f11d8c387b2eaeb4302aeeb00d291612bb0c00"
+    it("1024 cases of various length") {
+      val out = new Array[Byte](1024 + bytes)
 
-      val out = new Array[Byte](65)
-      Ed25519.cryptoSign(out, Array(0x72).map(_.toByte), 1, sk ++ pk)
-      toHex(out.take(bytes)) shouldBe expectedSig
+      for (line <- Source.fromFile("src/test/data/sign_data").getLines()) {
+        val data = line.split(',')
+        val sk = fromHex(data(0))
+        val pk = fromHex(data(1))
+        val signature = data(2)
+        val msg = if (data.length == 3) Array.empty[Byte] else fromHex(data(3))
+
+        Ed25519.cryptoSign(out, msg, msg.length, sk ++ pk)
+        toHex(out.take(bytes)) shouldBe signature
+      }
     }
 
   }

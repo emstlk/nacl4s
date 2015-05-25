@@ -179,6 +179,9 @@ object Sha512 {
   }
 
   def init(st: State) {
+    st.count(0) = 0
+    st.count(1) = 0
+
     st.state(0) = 0x6a09e667f3bcc908L
     st.state(1) = 0xbb67ae8584caa73bL
     st.state(2) = 0x3c6ef372fe94f82bL
