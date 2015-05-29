@@ -686,7 +686,7 @@ object FieldElement {
   def isNonZero(f: Array[Int]) = {
     val s = new Array[Byte](32)
     toBytes(s, f)
-    Verify.cryptoVerify32(s, 0, zero)
+    !Verify.cryptoVerify32(s, 0, zero)
   }
 
 }

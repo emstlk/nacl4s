@@ -487,6 +487,9 @@ class NaClSpec extends FunSpec with Matchers {
 
         Ed25519.cryptoSign(out, msg, msg.length, sk ++ pk)
         toHex(out.take(bytes)) shouldBe signature
+        noException shouldBe thrownBy {
+          Ed25519.cryptoSignOpen(msg, out, bytes + msg.length, pk)
+        }
       }
     }
 

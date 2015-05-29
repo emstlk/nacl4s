@@ -65,7 +65,7 @@ object Ed25519 {
     Sha512.init(hs)
     Sha512.update(hs, sig, 0, 32)
     Sha512.update(hs, pk, 0, 32)
-    Sha512.update(hs, m, 0, length)
+    Sha512.update(hs, m, offset, length)
     val h = new Array[Byte](64)
     Sha512.finish(hs, h)
     Scalar.reduce(h)

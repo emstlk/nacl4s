@@ -10,3 +10,4 @@ Already implemented
 - XSalsa20
 - Poly1305
 - Curve25519
+- Ed25519

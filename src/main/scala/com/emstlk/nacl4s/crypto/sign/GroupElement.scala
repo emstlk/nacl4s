@@ -203,9 +203,9 @@ object GroupElement {
     }
     e(63) = (e(63) + carry).toByte
 
-    //TODO fe_0
     h.y(0) = 1
     h.z(0) = 1
+
     val t = new Precomp
     val r = new P1p1
 
@@ -239,7 +239,6 @@ object GroupElement {
   def fromBytesNegateVartime(h: P3, s: Array[Byte]) {
     FieldElement.fromBytes(h.y, s)
 
-    //TODO fe_0
     h.z(0) = 1
 
     val u = new Array[Int](10)
@@ -273,8 +272,7 @@ object GroupElement {
       FieldElement.mul(h.x, h.x, Const.sqrtm1)
     }
 
-    //TODO check it
-    if (FieldElement.isNegative(h.x) == (s(31) >>> 7))
+    if (FieldElement.isNegative(h.x) == ((s(31) & 0xff) >>> 7))
       FieldElement.neg(h.x, h.x)
 
     FieldElement.mul(h.t, h.x, h.y)
@@ -283,15 +281,13 @@ object GroupElement {
   def slide(r: Array[Byte], a: Array[Byte], aOffset: Int) {
     var i = 0
     while (i < 256) {
-      //TODO check it
-      r(i) = (1 & (a(aOffset + (i >>> 3)) >>> (i & 7))).toByte
+      r(i) = (1 & (a(aOffset + (i >> 3)) >>> (i & 7))).toByte
       i += 1
     }
 
     i = 0
     while (i < 256) {
       if (r(i) != 0) {
-        //TODO check it
         breakable {
           var b = 1
           while (b <= 6 && i + b < 256) {
@@ -361,7 +357,6 @@ object GroupElement {
     p1p1ToP3(u, t)
     p3ToCached(ai(7), u)
 
-    //TODO fe_0
     r.y(0) = 1
     r.z(0) = 1
 
