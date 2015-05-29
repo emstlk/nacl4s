@@ -1,6 +1,6 @@
 package com.emstlk.nacl4s.crypto.sign
 
-object Sc {
+object Scalar {
 
   @inline def load3(in: Array[Byte], offset: Int): Long = {
     (in(offset).toLong & 0xff) |

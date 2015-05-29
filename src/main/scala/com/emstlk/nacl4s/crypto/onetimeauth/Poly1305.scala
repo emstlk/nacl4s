@@ -1,7 +1,7 @@
 package com.emstlk.nacl4s.crypto.onetimeauth
 
 import com.emstlk.nacl4s.crypto.Utils._
-import com.emstlk.nacl4s.crypto.verify.Verify16
+import com.emstlk.nacl4s.crypto.verify.Verify._
 
 object Poly1305 {
 
@@ -246,7 +246,7 @@ object Poly1305 {
   def cryptoOneTimeAuthVerify(h: Array[Byte], hOffset: Int, in: Array[Byte], inOffset: Int, inLength: Int, key: Array[Byte]) {
     val correct = new Array[Byte](16)
     cryptoOneTimeAuth(correct, 0, in, inOffset, inLength, key)
-    Verify16.cryptoVerify(h, hOffset, correct)
+    if (!cryptoVerify16(h, hOffset, correct)) sys.error("Decryption failed: ciphertext failed verification")
   }
 
 }

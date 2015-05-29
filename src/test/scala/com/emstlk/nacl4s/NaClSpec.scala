@@ -9,7 +9,7 @@ import com.emstlk.nacl4s.crypto.scalarmult.Curve25519
 import com.emstlk.nacl4s.crypto.secretbox.XSalsa20Poly1305
 import com.emstlk.nacl4s.crypto.sign.Ed25519
 import com.emstlk.nacl4s.crypto.stream.XSalsa20
-import com.emstlk.nacl4s.crypto.verify.Verify16
+import com.emstlk.nacl4s.crypto.verify.Verify
 import org.scalatest._
 
 import scala.io.Source
@@ -262,27 +262,31 @@ class NaClSpec extends FunSpec with Matchers {
 
   }
 
-  describe("Verify16") {
+  describe("Verify") {
 
-    import Verify16._
+    import Verify._
 
     it("first case") {
-      val v16 = new Array[Byte](bytes)
+      val v16 = new Array[Byte](16)
+      val v32 = new Array[Byte](32)
       random.nextBytes(v16)
+      random.nextBytes(v32)
 
-      val v16x = new Array[Byte](bytes)
-      Array.copy(v16, 0, v16x, 0, bytes)
+      val v16x = new Array[Byte](16)
+      val v32x = new Array[Byte](32)
+      Array.copy(v16, 0, v16x, 0, 16)
+      Array.copy(v32, 0, v32x, 0, 32)
 
-      noException should be thrownBy {
-        cryptoVerify(v16, 0, v16x)
-      }
+      cryptoVerify16(v16, 0, v16x) shouldBe true
+      cryptoVerify32(v32, 0, v32x) shouldBe true
 
-      val idx = random.nextInt(v16x.length)
+      var idx = random.nextInt(v16x.length)
       v16x(idx) = (v16x(idx) + 1).toByte
+      idx = random.nextInt(v32x.length)
+      v32x(idx) = (v32x(idx) + 1).toByte
 
-      the[RuntimeException] thrownBy {
-        cryptoVerify(v16, 0, v16x)
-      }
+      cryptoVerify16(v16, 0, v16x) shouldBe false
+      cryptoVerify32(v32, 0, v32x) shouldBe false
     }
 
   }
