@@ -1,5 +1,6 @@
 package com.emstlk.nacl4s.crypto.sign
 
+import com.emstlk.nacl4s.crypto.Utils._
 import com.emstlk.nacl4s.crypto.hash.Sha512
 import com.emstlk.nacl4s.crypto.hash.Sha512.State
 import com.emstlk.nacl4s.crypto.verify.Verify
@@ -84,6 +85,25 @@ object Ed25519 {
     val mLength = smLength - 64
     cryptoSignVerifyDetached(sm, sm, 64, mLength, pk)
     Array.copy(sm, 64, m, 0, mLength)
+  }
+
+  def cryptoSignSeedKeyPair(pk: Array[Byte], sk: Array[Byte], seed: Array[Byte]) {
+    Sha512.cryptoHash(sk, seed, 32)
+    sk(0) = (sk(0) & 248).toByte
+    sk(31) = ((sk(31) & 63) | 64).toByte
+
+    val a = new P3
+    GroupElement.scalarmultBase(a, sk)
+    GroupElement.p3ToBytes(pk, a)
+
+    Array.copy(seed, 0, sk, 0, 32)
+    Array.copy(pk, 0, sk, 32, 32)
+  }
+
+  def cryptoSignKeyPair(pk: Array[Byte], sk: Array[Byte]) {
+    val seed = new Array[Byte](32)
+    random.nextBytes(seed)
+    cryptoSignSeedKeyPair(pk, sk, seed)
   }
 
 }
