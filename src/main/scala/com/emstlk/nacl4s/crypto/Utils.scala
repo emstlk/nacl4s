@@ -28,8 +28,4 @@ object Utils {
     a(offset + 3) = (value >>> 24).toByte
   }
 
-  def toHex(a: Array[Byte]) = a.map("%02x" format _).mkString
-
-  def fromHex(s: String) = s.sliding(2, 2).toArray.map(Integer.parseInt(_, 16).toByte)
-
 }

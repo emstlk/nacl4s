@@ -16,6 +16,10 @@ import scala.io.Source
 
 class NaClSpec extends FunSpec with Matchers {
 
+  def toHex(a: Array[Byte]) = a.map("%02x" format _).mkString
+
+  def fromHex(s: String) = s.sliding(2, 2).toArray.map(Integer.parseInt(_, 16).toByte)
+
   describe("Salsa20") {
 
     import Salsa20._
@@ -485,12 +489,21 @@ class NaClSpec extends FunSpec with Matchers {
         val signature = data(2)
         val msg = if (data.length == 3) Array.empty[Byte] else fromHex(data(3))
 
-        Ed25519.cryptoSign(out, msg, msg.length, sk ++ pk)
+        cryptoSign(out, msg, msg.length, sk ++ pk)
         toHex(out.take(bytes)) shouldBe signature
         noException shouldBe thrownBy {
-          Ed25519.cryptoSignOpen(msg, out, bytes + msg.length, pk)
+          cryptoSignOpen(msg, out, bytes + msg.length, pk)
         }
       }
+    }
+
+    it("generate signing key pair") {
+      val pk = new Array[Byte](publicKeyBytes)
+      val sk = new Array[Byte](secretKeyBytes)
+      val seed = "421151a459faeade3d247115f94aedae42318124095afabe4d1451a559faedee"
+      cryptoSignSeedKeyPair(pk, sk, fromHex(seed))
+      toHex(pk) shouldBe "b5076a8474a832daee4dd5b4040983b6623b5f344aca57d4d6ee4baf3f259e6e"
+      toHex(sk) shouldBe (seed + "b5076a8474a832daee4dd5b4040983b6623b5f344aca57d4d6ee4baf3f259e6e")
     }
 
   }
