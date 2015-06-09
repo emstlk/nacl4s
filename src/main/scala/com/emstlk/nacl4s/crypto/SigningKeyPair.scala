@@ -9,7 +9,7 @@ object SigningKeyPair {
     val privateKey = new Array[Byte](secretKeyBytes)
     val publicKey = new Array[Byte](publicKeyBytes)
     cryptoSignKeyPair(publicKey, privateKey)
-    SigningKeyPair(privateKey, publicKey)
+    SigningKeyPair(SigningKey(privateKey), VerifyKey(publicKey))
   }
 
   def apply(seed: Array[Byte]): SigningKeyPair = {
@@ -17,14 +17,29 @@ object SigningKeyPair {
     val privateKey = new Array[Byte](secretKeyBytes)
     val publicKey = new Array[Byte](publicKeyBytes)
     cryptoSignSeedKeyPair(publicKey, privateKey, seed)
-    SigningKeyPair(privateKey, publicKey)
+    SigningKeyPair(SigningKey(privateKey), VerifyKey(publicKey))
   }
 
 }
 
-case class SigningKeyPair(privateKey: Array[Byte], publicKey: Array[Byte]) {
-  checkLength(privateKey, secretKeyBytes)
-  checkLength(publicKey, publicKeyBytes)
+case class SigningKeyPair(signingKey: SigningKey, verifyKey: VerifyKey)
 
+case class SigningKey(key: Array[Byte]) {
+  checkLength(key, secretKeyBytes)
 
+  def sign(message: Array[Byte]) = {
+    val data = new Array[Byte](bytes) ++ message
+    cryptoSign(data, message, message.length, key)
+    data.take(bytes)
+  }
+}
+
+case class VerifyKey(key: Array[Byte]) {
+  checkLength(key, publicKeyBytes)
+
+  def verify(message: Array[Byte], signature: Array[Byte]) {
+    checkLength(signature, bytes)
+    val data = signature ++ message
+    cryptoSignOpen(message, data, data.length, key)
+  }
 }

@@ -508,4 +508,43 @@ class NaClSpec extends FunSpec with Matchers {
 
   }
 
+  describe("Api") {
+
+    import NaCl._
+
+    def randomMessage() = {
+      val msg = new Array[Byte](random.nextInt(100) + 1)
+      random.nextBytes(msg)
+      msg
+    }
+
+    it("check box") {
+      val pair = KeyPair()
+      val box = Box(pair.publicKey, pair.privateKey)
+      val msg = randomMessage
+      val nonce = Box.randomNonce()
+
+      val encrypted = box.encrypt(nonce, msg)
+      box.decrypt(nonce, encrypted) shouldBe msg
+    }
+
+    it("check secret box") {
+      val box = SecretBox.withRandomKey()
+      val msg = randomMessage
+      val nonce = SecretBox.randomNonce()
+      val encrypted = box.encrypt(nonce, msg)
+      box.decrypt(nonce, encrypted) shouldBe msg
+    }
+
+    it("check signing key pair") {
+      val SigningKeyPair(signingKey, verifyKey) = SigningKeyPair()
+      val msg = randomMessage
+      val signature = signingKey.sign(msg)
+      noException shouldBe thrownBy {
+        verifyKey.verify(msg, signature)
+      }
+    }
+
+  }
+
 }

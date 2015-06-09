@@ -5,7 +5,11 @@ import com.emstlk.nacl4s.crypto.box.Curve25519XSalsa20Poly1305._
 
 object Box {
 
-  def apply(keyPair: KeyPair): Box = Box(keyPair.publicKey, keyPair.privateKey)
+  def randomNonce() = {
+    val nonce = new Array[Byte](nonceBytes)
+    random.nextBytes(nonce)
+    nonce
+  }
 
 }
 

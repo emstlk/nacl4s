@@ -3,6 +3,22 @@ package com.emstlk.nacl4s.crypto
 import com.emstlk.nacl4s.crypto.Utils._
 import com.emstlk.nacl4s.crypto.secretbox.XSalsa20Poly1305._
 
+object SecretBox {
+
+  def withRandomKey() = {
+    val key = new Array[Byte](keyBytes)
+    random.nextBytes(key)
+    SecretBox(key)
+  }
+
+  def randomNonce() = {
+    val nonce = new Array[Byte](nonceBytes)
+    random.nextBytes(nonce)
+    nonce
+  }
+
+}
+
 case class SecretBox(key: Array[Byte]) {
 
   checkLength(key, keyBytes)
