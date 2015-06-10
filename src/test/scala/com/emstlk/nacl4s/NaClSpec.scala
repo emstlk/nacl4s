@@ -519,29 +519,36 @@ class NaClSpec extends FunSpec with Matchers {
     }
 
     it("check box") {
-      val pair = KeyPair()
-      val box = Box(pair.publicKey, pair.privateKey)
-      val msg = randomMessage
-      val nonce = Box.randomNonce()
+      val aliceKeys = KeyPair()
+      val bobKeys = KeyPair()
 
-      val encrypted = box.encrypt(nonce, msg)
-      box.decrypt(nonce, encrypted) shouldBe msg
+      val message = "Some secret message \uD83D\uDE0E"
+      val aliceBox = Box(bobKeys.publicKey, aliceKeys.privateKey)
+      val nonce = Box.randomNonce()
+      val encrypted = aliceBox.encrypt(nonce, message.asBytes)
+
+      val bobBox = Box(aliceKeys.publicKey, bobKeys.privateKey)
+      bobBox.decrypt(nonce, encrypted).asString shouldBe message
     }
 
     it("check secret box") {
-      val box = SecretBox.withRandomKey()
-      val msg = randomMessage
+      val myBox = SecretBox.withRandomKey()
+      val key = myBox.key
+
+      val message = "Just another message"
       val nonce = SecretBox.randomNonce()
-      val encrypted = box.encrypt(nonce, msg)
-      box.decrypt(nonce, encrypted) shouldBe msg
+      val encrypted = myBox.encrypt(nonce, message.asBytes)
+
+      val friendBox = SecretBox(key)
+      friendBox.decrypt(nonce, encrypted).asString shouldBe message
     }
 
     it("check signing key pair") {
-      val SigningKeyPair(signingKey, verifyKey) = SigningKeyPair()
-      val msg = randomMessage
-      val signature = signingKey.sign(msg)
+      val keys = SigningKeyPair()
+      val msg = "The new one message".asBytes
+      val signature = SigningKey(keys.privateKey).sign(msg)
       noException shouldBe thrownBy {
-        verifyKey.verify(msg, signature)
+        VerifyKey(keys.publicKey).verify(msg, signature)
       }
     }
 
