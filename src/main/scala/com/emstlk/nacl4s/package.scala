@@ -1,10 +1,8 @@
-package com.emstlk.nacl4s
+package com.emstlk
 
 import java.nio.charset.Charset
 
-import scala.language.implicitConversions
-
-object NaCl {
+package object nacl4s {
 
   val charset = Charset.forName("UTF-8")
 

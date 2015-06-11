@@ -510,14 +510,6 @@ class NaClSpec extends FunSpec with Matchers {
 
   describe("Api") {
 
-    import NaCl._
-
-    def randomMessage() = {
-      val msg = new Array[Byte](random.nextInt(100) + 1)
-      random.nextBytes(msg)
-      msg
-    }
-
     it("check box") {
       val aliceKeys = KeyPair()
       val bobKeys = KeyPair()

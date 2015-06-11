@@ -23,7 +23,7 @@ This approach allows you encrypt a secret message for your friend, using friend'
 You can read more details [here](http://doc.libsodium.org/public-key_cryptography/authenticated_encryption.html)
 
 ```scala
-import com.emstlk.nacl4s.NaCl._
+import com.emstlk.nacl4s._
 
 val myKeys = KeyPair()
 val friendKeys = KeyPair()
@@ -42,7 +42,7 @@ In that case a single key is used to encrypt and decrypt messages.
 More details [here](http://doc.libsodium.org/secret-key_cryptography/authenticated_encryption.html)
 
 ```scala
-import com.emstlk.nacl4s.NaCl._
+import com.emstlk.nacl4s._
 
 val myBox = SecretBox.withRandomKey()
 val key = myBox.key
@@ -59,7 +59,7 @@ You can generate a key pair which allow you sign any message and anybody can ver
 More details [here](http://doc.libsodium.org/public-key_cryptography/public-key_signatures.html)
 
 ```scala
-import com.emstlk.nacl4s.NaCl._
+import com.emstlk.nacl4s._
 
 val keys = SigningKeyPair()
 val message = "The new one message".asBytes
