@@ -1,4 +1,4 @@
-# nacl4s - NaCl library for Scala 
+# NaCl4s - NaCl library for Scala 
 
 [![Build Status](https://travis-ci.org/emstlk/nacl4s.svg?branch=master)](https://travis-ci.org/emstlk/nacl4s)
 
@@ -14,6 +14,16 @@ Currently it has minimal functionality (box, secret box and signatures) based on
 - Curve25519
 - Sha512
 - Ed25519
+
+## Installation
+
+NaCl4s is published at Maven Central. Simply use the following sbt snippet:
+
+```scala
+libraryDependencies ++= Seq(
+  "com.github.emstlk" %% "nacl4s" % "1.0.0"
+)
+```
 
 ## Using the library
 
@@ -69,4 +79,4 @@ VerifyKey(keys.publicKey).verify(message, signature)
 ```
 
 ## Notes
-nacl4s is still a work in progress
+NaCl4s is still a work in progress
