@@ -1,5 +1,6 @@
 import sbt._
 import Keys._
+import pl.project13.scala.sbt.JmhPlugin
 
 object Build extends Build {
 
@@ -40,6 +41,6 @@ object Build extends Build {
           </developer>
         </developers>
     )
-  )
+  ).enablePlugins(JmhPlugin)
 
 }
