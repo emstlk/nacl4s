@@ -11,10 +11,11 @@ import com.emstlk.nacl4s.crypto.sign.Ed25519
 import com.emstlk.nacl4s.crypto.stream.XSalsa20
 import com.emstlk.nacl4s.crypto.verify.Verify
 import org.scalatest._
+import org.scalatest.prop._
 
 import scala.io.Source
 
-class NaClSpec extends FunSpec with Matchers {
+class NaClSpec extends FunSpec with Matchers with GeneratorDrivenPropertyChecks {
 
   def toHex(a: Array[Byte]) = a.map("%02x" format _).mkString
 
@@ -466,10 +467,10 @@ class NaClSpec extends FunSpec with Matchers {
         "931baae8c7cacfea4b629452c38026a81d138bc7aad1af3ef7bfd5ec646d6c28"
       val expectedHashX2 = "a77abe1ccf8f5497e228fbc0acd73a521ededb21b89726684a6ebbc3baa32361" +
         "aca5a244daa84f24bf19c68baf78e6907625a659b15479eb7bd426fc62aafa73"
-      cryptoHash(hash, x, x.length)
+      cryptoHash(hash, x, x.length.toLong)
       toHex(hash) shouldBe expectedHashX
 
-      cryptoHash(hash, x2, x2.length)
+      cryptoHash(hash, x2, x2.length.toLong)
       toHex(hash) shouldBe expectedHashX2
     }
 
@@ -511,36 +512,40 @@ class NaClSpec extends FunSpec with Matchers {
   describe("Api") {
 
     it("check box") {
-      val aliceKeys = KeyPair()
-      val bobKeys = KeyPair()
+      forAll { message: String =>
+        val aliceKeys = KeyPair()
+        val bobKeys = KeyPair()
 
-      val message = "Some secret message \uD83D\uDE0E"
-      val aliceBox = Box(bobKeys.publicKey, aliceKeys.privateKey)
-      val nonce = Box.randomNonce()
-      val encrypted = aliceBox.encrypt(nonce, message.asBytes)
+        val aliceBox = Box(bobKeys.publicKey, aliceKeys.privateKey)
+        val nonce = Box.randomNonce()
+        val encrypted = aliceBox.encrypt(nonce, message.asBytes)
 
-      val bobBox = Box(aliceKeys.publicKey, bobKeys.privateKey)
-      bobBox.decrypt(nonce, encrypted).asString shouldBe message
+        val bobBox = Box(aliceKeys.publicKey, bobKeys.privateKey)
+        bobBox.decrypt(nonce, encrypted).asString shouldBe message
+      }
     }
 
     it("check secret box") {
-      val myBox = SecretBox.withRandomKey()
-      val key = myBox.key
+      forAll { message: String =>
+        val myBox = SecretBox.withRandomKey()
+        val key = myBox.key
 
-      val message = "Just another message"
-      val nonce = SecretBox.randomNonce()
-      val encrypted = myBox.encrypt(nonce, message.asBytes)
+        val nonce = SecretBox.randomNonce()
+        val encrypted = myBox.encrypt(nonce, message.asBytes)
 
-      val friendBox = SecretBox(key)
-      friendBox.decrypt(nonce, encrypted).asString shouldBe message
+        val friendBox = SecretBox(key)
+        friendBox.decrypt(nonce, encrypted).asString shouldBe message
+      }
     }
 
     it("check signing key pair") {
-      val keys = SigningKeyPair()
-      val msg = "The new one message".asBytes
-      val signature = SigningKey(keys.privateKey).sign(msg)
-      noException shouldBe thrownBy {
-        VerifyKey(keys.publicKey).verify(msg, signature)
+      forAll { message: String =>
+        val keys = SigningKeyPair()
+        val msg = message.asBytes
+        val signature = SigningKey(keys.privateKey).sign(msg)
+        noException shouldBe thrownBy {
+          VerifyKey(keys.publicKey).verify(msg, signature)
+        }
       }
     }
 

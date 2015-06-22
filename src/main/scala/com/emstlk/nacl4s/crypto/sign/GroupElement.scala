@@ -10,14 +10,14 @@ object GroupElement {
   @inline def negative(b: Byte): Byte =
     (b.toLong >>> 63).toByte
 
-  @inline def cmov(t: Precomp, u: Precomp, b: Int) {
+  @inline def cmov(t: Precomp, u: Precomp, b: Int) = {
     FieldElement.cmov(t.yplusx, u.yplusx, b)
     FieldElement.cmov(t.yminusx, u.yminusx, b)
     FieldElement.cmov(t.xy2d, u.xy2d, b)
   }
 
   /** r = 2 * p */
-  def p2Dbl(r: P1p1, p: P2) {
+  def p2Dbl(r: P1p1, p: P2) = {
     val t0 = new Array[Int](10)
     FieldElement.sq(r.x, p.x, false)
     FieldElement.sq(r.z, p.y, false)
@@ -31,7 +31,7 @@ object GroupElement {
   }
 
   /** r = 2 * p */
-  def p3Dbl(r: P1p1, p: P3) {
+  def p3Dbl(r: P1p1, p: P3) = {
     val q = new P2
     Array.copy(p.x, 0, q.x, 0, 10)
     Array.copy(p.y, 0, q.y, 0, 10)
@@ -39,7 +39,7 @@ object GroupElement {
     p2Dbl(r, q)
   }
 
-  def select(t: Precomp, pos: Int, b: Byte) {
+  def select(t: Precomp, pos: Int, b: Byte) = {
     val bNegative = negative(b)
     val babs = (b - (((-bNegative) & b) << 1)).toByte
 
@@ -54,14 +54,15 @@ object GroupElement {
       i += 1
     }
 
-    cmov(t, Const.base(pos)(0), equal(babs, 1))
-    cmov(t, Const.base(pos)(1), equal(babs, 2))
-    cmov(t, Const.base(pos)(2), equal(babs, 3))
-    cmov(t, Const.base(pos)(3), equal(babs, 4))
-    cmov(t, Const.base(pos)(4), equal(babs, 5))
-    cmov(t, Const.base(pos)(5), equal(babs, 6))
-    cmov(t, Const.base(pos)(6), equal(babs, 7))
-    cmov(t, Const.base(pos)(7), equal(babs, 8))
+    val base = Const.base
+    cmov(t, base(pos)(0), equal(babs, 1).toInt)
+    cmov(t, base(pos)(1), equal(babs, 2).toInt)
+    cmov(t, base(pos)(2), equal(babs, 3).toInt)
+    cmov(t, base(pos)(3), equal(babs, 4).toInt)
+    cmov(t, base(pos)(4), equal(babs, 5).toInt)
+    cmov(t, base(pos)(5), equal(babs, 6).toInt)
+    cmov(t, base(pos)(6), equal(babs, 7).toInt)
+    cmov(t, base(pos)(7), equal(babs, 8).toInt)
 
     val minust = new Precomp
     Array.copy(t.yminusx, 0, minust.yplusx, 0, 10)
@@ -71,11 +72,11 @@ object GroupElement {
       minust.xy2d(i) = -t.xy2d(i)
       i += 1
     }
-    cmov(t, minust, bNegative)
+    cmov(t, minust, bNegative.toInt)
   }
 
   /** r = p + q */
-  def add(r: P1p1, p: P3, q: Cached) {
+  def add(r: P1p1, p: P3, q: Cached) = {
     val t0 = new Array[Int](10)
     FieldElement.add(r.x, p.y, p.x)
     FieldElement.sub(r.y, p.y, p.x)
@@ -91,7 +92,7 @@ object GroupElement {
   }
 
   /** r = p - q */
-  def sub(r: P1p1, p: P3, q: Cached) {
+  def sub(r: P1p1, p: P3, q: Cached) = {
     val t0 = new Array[Int](10)
     FieldElement.add(r.x, p.y, p.x)
     FieldElement.sub(r.y, p.y, p.x)
@@ -107,7 +108,7 @@ object GroupElement {
   }
 
   /** r = p + q */
-  def madd(r: P1p1, p: P3, q: Precomp) {
+  def madd(r: P1p1, p: P3, q: Precomp) = {
     val t0 = new Array[Int](10)
     FieldElement.add(r.x, p.y, p.x)
     FieldElement.sub(r.y, p.y, p.x)
@@ -122,7 +123,7 @@ object GroupElement {
   }
 
   /** r = p - q */
-  def msub(r: P1p1, p: P3, q: Precomp) {
+  def msub(r: P1p1, p: P3, q: Precomp) = {
     val t0 = new Array[Int](10)
     FieldElement.add(r.x, p.y, p.x)
     FieldElement.sub(r.y, p.y, p.x)
@@ -137,28 +138,28 @@ object GroupElement {
   }
 
   /** r = p */
-  def p1p1ToP2(r: P2, p: P1p1) {
+  def p1p1ToP2(r: P2, p: P1p1) = {
     FieldElement.mul(r.x, p.x, p.t)
     FieldElement.mul(r.y, p.y, p.z)
     FieldElement.mul(r.z, p.z, p.t)
   }
 
   /** r = p */
-  def p1p1ToP3(r: P3, p: P1p1) {
+  def p1p1ToP3(r: P3, p: P1p1) = {
     FieldElement.mul(r.x, p.x, p.t)
     FieldElement.mul(r.y, p.y, p.z)
     FieldElement.mul(r.z, p.z, p.t)
     FieldElement.mul(r.t, p.x, p.y)
   }
 
-  def p3ToCached(r: Cached, p: P3) {
+  def p3ToCached(r: Cached, p: P3) = {
     FieldElement.add(r.yplusx, p.y, p.x)
     FieldElement.sub(r.yminusx, p.y, p.x)
     Array.copy(p.z, 0, r.z, 0, 10)
     FieldElement.mul(r.t2d, p.t, Const.d2)
   }
 
-  def p3ToBytes(s: Array[Byte], h: P3) {
+  def p3ToBytes(s: Array[Byte], h: P3) = {
     val recip = new Array[Int](10)
     val x = new Array[Int](10)
     val y = new Array[Int](10)
@@ -171,7 +172,7 @@ object GroupElement {
   }
 
   //TODO the same as p3ToBytes
-  def toBytes(s: Array[Byte], h: P2) {
+  def toBytes(s: Array[Byte], h: P2) = {
     val recip = new Array[Int](10)
     val x = new Array[Int](10)
     val y = new Array[Int](10)
@@ -183,7 +184,7 @@ object GroupElement {
     s(31) = (s(31) ^ (FieldElement.isNegative(x) << 7)).toByte
   }
 
-  def scalarmultBase(h: P3, a: Array[Byte]) {
+  def scalarmultBase(h: P3, a: Array[Byte]) = {
     val e = new Array[Byte](64)
 
     var i = 0
@@ -236,7 +237,7 @@ object GroupElement {
     }
   }
 
-  def fromBytesNegateVartime(h: P3, s: Array[Byte]) {
+  def fromBytesNegateVartime(h: P3, s: Array[Byte]) = {
     FieldElement.fromBytes(h.y, s)
 
     h.z(0) = 1
@@ -278,7 +279,7 @@ object GroupElement {
     FieldElement.mul(h.t, h.x, h.y)
   }
 
-  def slide(r: Array[Byte], a: Array[Byte], aOffset: Int) {
+  def slide(r: Array[Byte], a: Array[Byte], aOffset: Int) = {
     var i = 0
     while (i < 256) {
       r(i) = (1 & (a(aOffset + (i >> 3)) >>> (i & 7))).toByte
@@ -318,7 +319,7 @@ object GroupElement {
     }
   }
 
-  def doubleScalarmultVartime(r: P2, a: Array[Byte], p: P3, b: Array[Byte], bOffset: Int) {
+  def doubleScalarmultVartime(r: P2, a: Array[Byte], p: P3, b: Array[Byte], bOffset: Int) = {
     val aSlide = new Array[Byte](256)
     val bSlide = new Array[Byte](256)
     slide(aSlide, a, 0)

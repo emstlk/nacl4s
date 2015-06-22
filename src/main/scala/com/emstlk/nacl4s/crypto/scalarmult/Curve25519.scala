@@ -25,7 +25,7 @@ object Curve25519 {
       ((in(offset + 7).toLong & 0xff) << 56)
   }
 
-  @inline def storeLong(out: Array[Byte], offset: Int, in: Long) {
+  @inline def storeLong(out: Array[Byte], offset: Int, in: Long) = {
     out(offset) = (in & 0xff).toByte
     out(offset + 1) = ((in >>> 8) & 0xff).toByte
     out(offset + 2) = ((in >>> 16) & 0xff).toByte
@@ -36,7 +36,7 @@ object Curve25519 {
     out(offset + 7) = ((in >>> 56) & 0xff).toByte
   }
 
-  @inline def sum(out: Array[Long], in: Array[Long]) {
+  @inline def sum(out: Array[Long], in: Array[Long]) = {
     out(0) += in(0)
     out(1) += in(1)
     out(2) += in(2)
@@ -44,7 +44,7 @@ object Curve25519 {
     out(4) += in(4)
   }
 
-  @inline def differenceBackwards(out: Array[Long], in: Array[Long]) {
+  @inline def differenceBackwards(out: Array[Long], in: Array[Long]) = {
     out(0) = in(0) + two54m152 - out(0)
     out(1) = in(1) + two54m8 - out(1)
     out(2) = in(2) + two54m8 - out(2)
@@ -52,7 +52,7 @@ object Curve25519 {
     out(4) = in(4) + two54m8 - out(4)
   }
 
-  @inline def scalarProduct(out: Array[Long], in: Array[Long], scalar: Long) {
+  @inline def scalarProduct(out: Array[Long], in: Array[Long], scalar: Long) = {
     var a = BigInt(in(0)) * scalar
     out(0) = a.toLong & 0x7ffffffffffffL
 
@@ -71,7 +71,7 @@ object Curve25519 {
     out(0) += ((a >> 51) * 19).toLong
   }
 
-  def multiply(out: Array[Long], in2: Array[Long], in: Array[Long]) {
+  def multiply(out: Array[Long], in2: Array[Long], in: Array[Long]) = {
     val t = new Array[BigInt](5)
 
     var r0 = BigInt(in(0))
@@ -135,7 +135,7 @@ object Curve25519 {
     out(4) = r4.toLong
   }
 
-  def squareTimes(out: Array[Long], in: Array[Long], count: Int) {
+  def squareTimes(out: Array[Long], in: Array[Long], count: Int) = {
     val t = new Array[BigInt](5)
 
     var r0 = BigInt(in(0))
@@ -193,7 +193,7 @@ object Curve25519 {
     out(4) = r4.toLong
   }
 
-  @inline def expand(out: Array[Long], in: Array[Byte]) {
+  @inline def expand(out: Array[Long], in: Array[Byte]) = {
     out(0) = loadLong(in, 0) & 0x7ffffffffffffL
     out(1) = (loadLong(in, 6) >>> 3) & 0x7ffffffffffffL
     out(2) = (loadLong(in, 12) >>> 6) & 0x7ffffffffffffL
@@ -201,7 +201,7 @@ object Curve25519 {
     out(4) = (loadLong(in, 24) >>> 12) & 0x7ffffffffffffL
   }
 
-  def contract(out: Array[Byte], in: Array[Long]) {
+  def contract(out: Array[Byte], in: Array[Long]) = {
     val t = new Array[BigInt](5)
 
     t(0) = in(0)
@@ -210,7 +210,7 @@ object Curve25519 {
     t(3) = in(3)
     t(4) = in(4)
 
-    @inline def doReduce() {
+    @inline def doReduce() = {
       t(1) += t(0) >> 51
       t(0) &= 0x7ffffffffffffL
 
@@ -261,7 +261,7 @@ object Curve25519 {
   }
 
   def monty(x2: Array[Long], z2: Array[Long], x3: Array[Long], z3: Array[Long], x: Array[Long],
-            z: Array[Long], xprime: Array[Long], zprime: Array[Long], qmqp: Array[Long]) {
+            z: Array[Long], xprime: Array[Long], zprime: Array[Long], qmqp: Array[Long]) = {
     val origx = new Array[Long](5)
     Array.copy(x, 0, origx, 0, 5)
     sum(x, z)
@@ -297,7 +297,7 @@ object Curve25519 {
     multiply(z2, zz, zzz)
   }
 
-  @inline def swapConditional(a: Array[Long], b: Array[Long]) {
+  @inline def swapConditional(a: Array[Long], b: Array[Long]) = {
     var i = 0
     while (i < 5) {
       val x = a(i)
@@ -307,7 +307,7 @@ object Curve25519 {
     }
   }
 
-  def cmultiply(resultx: Array[Long], resultz: Array[Long], n: Array[Byte], q: Array[Long]) {
+  def cmultiply(resultx: Array[Long], resultz: Array[Long], n: Array[Byte], q: Array[Long]) = {
     var nqpqx = new Array[Long](5)
     Array.copy(q, 0, nqpqx, 0, 5)
     var nqpqz = new Array[Long](5)
@@ -371,7 +371,7 @@ object Curve25519 {
     Array.copy(nqz, 0, resultz, 0, 5)
   }
 
-  def crecip(out: Array[Long], z: Array[Long]) {
+  def crecip(out: Array[Long], z: Array[Long]) = {
     val a = new Array[Long](5)
     val t0 = new Array[Long](5)
     val b = new Array[Long](5)
@@ -403,7 +403,7 @@ object Curve25519 {
 
   def cryptoScalarmultBase(q: Array[Byte], n: Array[Byte]) = cryptoScalarmult(q, n, basepoint)
 
-  def cryptoScalarmult(public: Array[Byte], secret: Array[Byte], basepoint: Array[Byte]) {
+  def cryptoScalarmult(public: Array[Byte], secret: Array[Byte], basepoint: Array[Byte]) = {
     val e = new Array[Byte](32)
 
     var i = 0

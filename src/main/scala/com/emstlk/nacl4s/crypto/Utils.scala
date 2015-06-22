@@ -10,7 +10,7 @@ object Utils {
 
   lazy val random = new SecureRandom
 
-  @inline def checkLength(a: Array[Byte], length: Int) {
+  @inline def checkLength(a: Array[Byte], length: Int) = {
     require(Option(a).exists(_.length == length), s"Wrong length, required $length")
   }
 
@@ -21,7 +21,7 @@ object Utils {
       (a(offset + 3) & 0xff) << 24
   }
 
-  @inline def storeInt(a: Array[Byte], offset: Int, value: Int) {
+  @inline def storeInt(a: Array[Byte], offset: Int, value: Int) = {
     a(offset) = value.toByte
     a(offset + 1) = (value >>> 8).toByte
     a(offset + 2) = (value >>> 16).toByte

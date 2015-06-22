@@ -12,7 +12,7 @@ object Ed25519 {
   val publicKeyBytes = 32
   val secretKeyBytes = 64
 
-  def cryptoSignDetached(sig: Array[Byte], m: Array[Byte], mOffset: Int, mLength: Int, sk: Array[Byte]) {
+  def cryptoSignDetached(sig: Array[Byte], m: Array[Byte], mOffset: Int, mLength: Int, sk: Array[Byte]) = {
     val az = new Array[Byte](64)
     val nonce = new Array[Byte](64)
     val hram = new Array[Byte](64)
@@ -26,7 +26,7 @@ object Ed25519 {
     val hs = State()
     Sha512.init(hs)
     Sha512.update(hs, az, 32, 32)
-    Sha512.update(hs, m, mOffset, mLength)
+    Sha512.update(hs, m, mOffset, mLength.toLong)
     Sha512.finish(hs, nonce)
 
     Scalar.reduce(nonce)
@@ -36,19 +36,19 @@ object Ed25519 {
 
     Sha512.init(hs)
     Sha512.update(hs, sig, 0, 64)
-    Sha512.update(hs, m, mOffset, mLength)
+    Sha512.update(hs, m, mOffset, mLength.toLong)
     Sha512.finish(hs, hram)
 
     Scalar.reduce(hram)
     Scalar.muladd(sig, 32, hram, az, nonce)
   }
 
-  def cryptoSign(sm: Array[Byte], m: Array[Byte], mLength: Int, sk: Array[Byte]) {
+  def cryptoSign(sm: Array[Byte], m: Array[Byte], mLength: Int, sk: Array[Byte]) = {
     Array.copy(m, 0, sm, bytes, mLength)
     cryptoSignDetached(sm, sm, bytes, mLength, sk)
   }
 
-  def cryptoSignVerifyDetached(sig: Array[Byte], m: Array[Byte], offset: Int, length: Int, pk: Array[Byte]) {
+  def cryptoSignVerifyDetached(sig: Array[Byte], m: Array[Byte], offset: Int, length: Int, pk: Array[Byte]) = {
     require((sig(63) & 224) == 0)
 
     val a = new P3
@@ -66,7 +66,7 @@ object Ed25519 {
     Sha512.init(hs)
     Sha512.update(hs, sig, 0, 32)
     Sha512.update(hs, pk, 0, 32)
-    Sha512.update(hs, m, offset, length)
+    Sha512.update(hs, m, offset, length.toLong)
     val h = new Array[Byte](64)
     Sha512.finish(hs, h)
     Scalar.reduce(h)
@@ -79,7 +79,7 @@ object Ed25519 {
     require(Verify.cryptoVerify32(rCheck, 0, sig))
   }
 
-  def cryptoSignOpen(m: Array[Byte], sm: Array[Byte], smLength: Int, pk: Array[Byte]) {
+  def cryptoSignOpen(m: Array[Byte], sm: Array[Byte], smLength: Int, pk: Array[Byte]) = {
     require(smLength >= 64)
 
     val mLength = smLength - 64
@@ -87,7 +87,7 @@ object Ed25519 {
     Array.copy(sm, 64, m, 0, mLength)
   }
 
-  def cryptoSignSeedKeyPair(pk: Array[Byte], sk: Array[Byte], seed: Array[Byte]) {
+  def cryptoSignSeedKeyPair(pk: Array[Byte], sk: Array[Byte], seed: Array[Byte]) = {
     Sha512.cryptoHash(sk, seed, 32)
     sk(0) = (sk(0) & 248).toByte
     sk(31) = ((sk(31) & 63) | 64).toByte
@@ -100,7 +100,7 @@ object Ed25519 {
     Array.copy(pk, 0, sk, 32, 32)
   }
 
-  def cryptoSignKeyPair(pk: Array[Byte], sk: Array[Byte]) {
+  def cryptoSignKeyPair(pk: Array[Byte], sk: Array[Byte]) = {
     val seed = new Array[Byte](32)
     random.nextBytes(seed)
     cryptoSignSeedKeyPair(pk, sk, seed)

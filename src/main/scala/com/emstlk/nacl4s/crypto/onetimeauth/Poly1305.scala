@@ -14,7 +14,7 @@ object Poly1305 {
                          buffer: Array[Byte],
                          var fin: Byte)
 
-  def init(st: State, k: Array[Byte]) {
+  def init(st: State, k: Array[Byte]) = {
     st.r(0) = loadInt(k, 0) & 0x3ffffff
     st.r(1) = (loadInt(k, 3) >>> 2) & 0x3ffff03
     st.r(2) = (loadInt(k, 6) >>> 4) & 0x3ffc0ff
@@ -27,7 +27,7 @@ object Poly1305 {
     st.pad(3) = loadInt(k, 28)
   }
 
-  def blocks(st: State, m: Array[Byte], offset: Int, length: Int) {
+  def blocks(st: State, m: Array[Byte], offset: Int, length: Int) = {
     val hibit = if (st.fin != 0) 0 else 1 << 24
 
     val r0 = st.r(0).toLong
@@ -102,7 +102,7 @@ object Poly1305 {
     st.h(4) = h4
   }
 
-  def finish(st: State, mac: Array[Byte], offset: Int) {
+  def finish(st: State, mac: Array[Byte], offset: Int) = {
     if (st.leftover != 0) {
       st.buffer(st.leftover) = 1
       var i = st.leftover + 1
@@ -196,7 +196,7 @@ object Poly1305 {
     storeInt(mac, offset + 12, h3)
   }
 
-  def update(st: State, m: Array[Byte], offset: Int, length: Int) {
+  def update(st: State, m: Array[Byte], offset: Int, length: Int): Unit = {
     var pos = offset
 
     if (st.leftover != 0) {
@@ -236,14 +236,14 @@ object Poly1305 {
     }
   }
 
-  def cryptoOneTimeAuth(out: Array[Byte], outOffset: Int, m: Array[Byte], mOffset: Int, mLength: Int, key: Array[Byte]) {
+  def cryptoOneTimeAuth(out: Array[Byte], outOffset: Int, m: Array[Byte], mOffset: Int, mLength: Int, key: Array[Byte]) = {
     val state = State(new Array[Int](5), new Array[Int](5), new Array[Int](4), 0, new Array[Byte](blockSize), 0)
     init(state, key)
     update(state, m, mOffset, mLength)
     finish(state, out, outOffset)
   }
 
-  def cryptoOneTimeAuthVerify(h: Array[Byte], hOffset: Int, in: Array[Byte], inOffset: Int, inLength: Int, key: Array[Byte]) {
+  def cryptoOneTimeAuthVerify(h: Array[Byte], hOffset: Int, in: Array[Byte], inOffset: Int, inLength: Int, key: Array[Byte]) = {
     val correct = new Array[Byte](16)
     cryptoOneTimeAuth(correct, 0, in, inOffset, inLength, key)
     if (!cryptoVerify16(h, hOffset, correct)) sys.error("Decryption failed: ciphertext failed verification")

@@ -11,7 +11,7 @@ object Salsa20 {
 
   @inline def rotate(u: Int, c: Int) = (u << c) | (u >>> (32 - c))
 
-  def cryptoCore(out: Array[Byte], in: Array[Byte], k: Array[Byte], c: Array[Byte]) {
+  def cryptoCore(out: Array[Byte], in: Array[Byte], k: Array[Byte], c: Array[Byte]) = {
     var j0, x0 = loadInt(c, 0)
     var j1, x1 = loadInt(k, 0)
     var j2, x2 = loadInt(k, 4)
@@ -101,7 +101,7 @@ object Salsa20 {
     storeInt(out, 60, x15)
   }
 
-  def cryptoStream(c: Array[Byte], clen: Int, n: Array[Byte], noffset: Int, k: Array[Byte]) {
+  def cryptoStream(c: Array[Byte], clen: Int, n: Array[Byte], noffset: Int, k: Array[Byte]) = {
     if (clen > 0) {
       val in = new Array[Byte](16)
       Array.copy(n, noffset, in, 0, 8)
@@ -131,7 +131,7 @@ object Salsa20 {
     }
   }
 
-  def cryptoStreamXor(c: Array[Byte], m: Array[Byte], mlen: Int, n: Array[Byte], noffset: Int, k: Array[Byte]) {
+  def cryptoStreamXor(c: Array[Byte], m: Array[Byte], mlen: Int, n: Array[Byte], noffset: Int, k: Array[Byte]) = {
     if (mlen > 0) {
       val in = new Array[Byte](16)
       val block = new Array[Byte](64)

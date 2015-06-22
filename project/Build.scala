@@ -1,6 +1,7 @@
 import sbt._
 import Keys._
 import pl.project13.scala.sbt.JmhPlugin
+import scoverage.ScoverageSbtPlugin.ScoverageKeys._
 
 object Build extends Build {
 
@@ -9,13 +10,29 @@ object Build extends Build {
     base = file("."),
     settings = Seq(
       organization := "com.github.emstlk",
-      version := "1.0.0",
+      version := "1.0.0-SNAPSHOT",
       scalaVersion := "2.11.6",
       crossScalaVersions := Seq("2.10.5", "2.11.6"),
-      scalacOptions ++= Seq("-encoding", "UTF-8", "-deprecation", "-unchecked", "-feature"),
+      scalacOptions ++= Seq(
+        "-encoding", "UTF-8",
+        "-deprecation",
+        "-unchecked",
+        "-feature",
+        "-Xfatal-warnings",
+        "-Xlint",
+        "-Xfuture",
+        "-Yno-adapted-args",
+        "-Ywarn-dead-code",
+        "-Ywarn-numeric-widen"
+      ) ++ (CrossVersion.partialVersion(scalaVersion.value) match {
+        case Some((2, 11)) => Seq("-Ywarn-unused-import")
+        case _ => Seq.empty
+      }),
       libraryDependencies ++= Seq(
-        "org.scalatest" %% "scalatest" % "2.2.4" % "test" withSources()
+        "org.scalatest" %% "scalatest" % "2.2.4" % "test" withSources(),
+        "org.scalacheck" %% "scalacheck" % "1.12.2" % "test" withSources()
       ),
+      coverageExcludedPackages := "com\\.emstlk\\.nacl4s\\.crypto\\.sign\\.Const;com\\.emstlk\\.nacl4s\\.benchmark",
       publishMavenStyle := true,
       publishArtifact := true,
       publishTo := {

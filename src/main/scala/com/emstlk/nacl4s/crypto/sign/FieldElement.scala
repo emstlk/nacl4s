@@ -5,7 +5,7 @@ import com.emstlk.nacl4s.crypto.verify.Verify
 
 object FieldElement {
 
-  @inline def add(h: Array[Int], f: Array[Int], g: Array[Int]) {
+  @inline def add(h: Array[Int], f: Array[Int], g: Array[Int]) = {
     var i = 0
     while (i < 10) {
       h(i) = f(i) + g(i)
@@ -13,7 +13,7 @@ object FieldElement {
     }
   }
 
-  @inline def sub(h: Array[Int], f: Array[Int], g: Array[Int]) {
+  @inline def sub(h: Array[Int], f: Array[Int], g: Array[Int]) = {
     var i = 0
     while (i < 10) {
       h(i) = f(i) - g(i)
@@ -21,7 +21,7 @@ object FieldElement {
     }
   }
 
-  @inline def neg(h: Array[Int], f: Array[Int]) {
+  @inline def neg(h: Array[Int], f: Array[Int]) = {
     var i = 0
     while (i < 10) {
       h(i) = -f(i)
@@ -29,7 +29,7 @@ object FieldElement {
     }
   }
 
-  def mul(h: Array[Int], f: Array[Int], g: Array[Int]) {
+  def mul(h: Array[Int], f: Array[Int], g: Array[Int]) = {
     val g1_19 = 19 * g(1)
     val g2_19 = 19 * g(2)
     val g3_19 = 19 * g(3)
@@ -212,7 +212,7 @@ object FieldElement {
   }
 
   /** h = f * f or h = 2 * f * f if double is true */
-  def sq(h: Array[Int], f: Array[Int], double: Boolean) {
+  def sq(h: Array[Int], f: Array[Int], double: Boolean) = {
     val f0_2 = 2 * f(0)
     val f1_2 = 2 * f(1)
     val f2_2 = 2 * f(2)
@@ -361,7 +361,7 @@ object FieldElement {
     h(9) = h9.toInt
   }
 
-  @inline def cmov(f: Array[Int], g: Array[Int], b: Int) {
+  @inline def cmov(f: Array[Int], g: Array[Int], b: Int) = {
     val nb = -b
     var i = 0
     while (i <= 9) {
@@ -370,7 +370,7 @@ object FieldElement {
     }
   }
 
-  def pow22523(out: Array[Int], z: Array[Int]) {
+  def pow22523(out: Array[Int], z: Array[Int]) = {
     val t0 = new Array[Int](10)
     val t1 = new Array[Int](10)
     val t2 = new Array[Int](10)
@@ -446,7 +446,7 @@ object FieldElement {
     mul(out, t0, z)
   }
 
-  def invert(out: Array[Int], z: Array[Int]) {
+  def invert(out: Array[Int], z: Array[Int]) = {
     val t0 = new Array[Int](10)
     val t1 = new Array[Int](10)
     val t2 = new Array[Int](10)
@@ -529,7 +529,7 @@ object FieldElement {
   }
 
   /* Ignores top bit of h */
-  def fromBytes(h: Array[Int], s: Array[Byte]) {
+  def fromBytes(h: Array[Int], s: Array[Byte]) = {
     var h0 = load4(s, 0)
     var h1 = load3(s, 4) << 6
     var h2 = load3(s, 7) << 5
@@ -585,7 +585,7 @@ object FieldElement {
     h(9) = h9.toInt
   }
 
-  def toBytes(s: Array[Byte], h: Array[Int]) {
+  def toBytes(s: Array[Byte], h: Array[Int]) = {
     var h0 = h(0)
     var h1 = h(1)
     var h2 = h(2)

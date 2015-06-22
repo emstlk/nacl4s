@@ -19,7 +19,7 @@ object Sha512 {
       ((in(offset).toLong & 0xff) << 56)
   }
 
-  @inline def storeLong(out: Array[Byte], offset: Int, in: Long) {
+  @inline def storeLong(out: Array[Byte], offset: Int, in: Long) = {
     out(offset + 7) = (in & 0xff).toByte
     out(offset + 6) = ((in >>> 8) & 0xff).toByte
     out(offset + 5) = ((in >>> 16) & 0xff).toByte
@@ -30,7 +30,7 @@ object Sha512 {
     out(offset) = ((in >>> 56) & 0xff).toByte
   }
 
-  def sha512Transform(state: Array[Long], block: Array[Byte], offset: Int) {
+  def sha512Transform(state: Array[Long], block: Array[Byte], offset: Int) = {
     val w = new Array[Long](80)
     val s = new Array[Long](8)
 
@@ -38,7 +38,7 @@ object Sha512 {
 
     @inline def rotr(x: Long, n: Int) = (x >>> n) | (x << (64 - n))
 
-    @inline def rnd(i: Int, k: Long) {
+    @inline def rnd(i: Int, k: Long) = {
       val a = s((80 - i) % 8)
       val b = s((81 - i) % 8)
       val c = s((82 - i) % 8)
@@ -166,7 +166,7 @@ object Sha512 {
     p
   }
 
-  def sha512Pad(st: State) {
+  def sha512Pad(st: State) = {
     val len = new Array[Byte](16)
     storeLong(len, 0, st.count(0))
     storeLong(len, 8, st.count(1))
@@ -178,7 +178,7 @@ object Sha512 {
     update(st, len, 0, 16)
   }
 
-  def init(st: State) {
+  def init(st: State) = {
     st.count(0) = 0
     st.count(1) = 0
 
@@ -192,7 +192,7 @@ object Sha512 {
     st.state(7) = 0x5be0cd19137e2179L
   }
 
-  def update(st: State, in: Array[Byte], offset: Int, length: Long) {
+  def update(st: State, in: Array[Byte], offset: Int, length: Long) = {
     val r = (st.count(1) >>> 3) & 0x7f
 
     val bitLen = new Array[Long](2)
@@ -218,7 +218,7 @@ object Sha512 {
     }
   }
 
-  def finish(st: State, out: Array[Byte]) {
+  def finish(st: State, out: Array[Byte]) = {
     sha512Pad(st)
     var i = 0
     while (i < 8) {
@@ -227,7 +227,7 @@ object Sha512 {
     }
   }
 
-  def cryptoHash(out: Array[Byte], in: Array[Byte], length: Long) {
+  def cryptoHash(out: Array[Byte], in: Array[Byte], length: Long) = {
     val st = State()
     init(st)
     update(st, in, 0, length)

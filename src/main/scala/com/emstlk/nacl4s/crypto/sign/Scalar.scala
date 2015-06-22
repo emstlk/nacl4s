@@ -15,7 +15,7 @@ object Scalar {
       ((in(offset + 3).toLong & 0xff) << 24)
   }
 
-  def reduce(s: Array[Byte]) {
+  def reduce(s: Array[Byte]) = {
     var s0 = 2097151 & load3(s, 0)
     var s1 = 2097151 & (load4(s, 2) >>> 5)
     var s2 = 2097151 & (load3(s, 5) >>> 2)
@@ -319,7 +319,7 @@ object Scalar {
     s(31) = (s11 >>> 17).toByte
   }
 
-  def muladd(s: Array[Byte], sOffset: Int, a: Array[Byte], b: Array[Byte], c: Array[Byte]) {
+  def muladd(s: Array[Byte], sOffset: Int, a: Array[Byte], b: Array[Byte], c: Array[Byte]) = {
     val a0 = 2097151 & load3(a, 0)
     val a1 = 2097151 & (load4(a, 2) >>> 5)
     val a2 = 2097151 & (load3(a, 5) >>> 2)

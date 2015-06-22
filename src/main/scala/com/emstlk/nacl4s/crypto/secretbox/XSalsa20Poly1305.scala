@@ -10,7 +10,7 @@ object XSalsa20Poly1305 {
   val zeroBytes = 32
   val boxZeroBytes = 16
 
-  def cryptoSecretBox(c: Array[Byte], m: Array[Byte], mlen: Int, n: Array[Byte], k: Array[Byte]) {
+  def cryptoSecretBox(c: Array[Byte], m: Array[Byte], mlen: Int, n: Array[Byte], k: Array[Byte]) = {
     require(mlen >= zeroBytes)
 
     XSalsa20.cryptoStreamXor(c, m, mlen, n, k)
@@ -23,7 +23,7 @@ object XSalsa20Poly1305 {
     }
   }
 
-  def cryptoSecretBoxOpen(m: Array[Byte], c: Array[Byte], clen: Int, n: Array[Byte], k: Array[Byte]) {
+  def cryptoSecretBoxOpen(m: Array[Byte], c: Array[Byte], clen: Int, n: Array[Byte], k: Array[Byte]) = {
     require(clen >= zeroBytes)
 
     val subkey = new Array[Byte](keyBytes)

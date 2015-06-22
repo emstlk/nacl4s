@@ -29,7 +29,7 @@ libraryDependencies ++= Seq(
 
 #### Public-key authenticated encryption
 
-This approach allows you encrypt a secret message for your friend, using friend's public key. 
+This approach allows you to encrypt a secret message for your friend, using friend's public key.
 You can read more details [here](http://doc.libsodium.org/public-key_cryptography/authenticated_encryption.html)
 
 ```scala

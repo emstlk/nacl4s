@@ -37,7 +37,7 @@ case class SigningKey(privateKey: Array[Byte]) {
 case class VerifyKey(publicKey: Array[Byte]) {
   checkLength(publicKey, publicKeyBytes)
 
-  def verify(message: Array[Byte], signature: Array[Byte]) {
+  def verify(message: Array[Byte], signature: Array[Byte]) = {
     checkLength(signature, bytes)
     val data = signature ++ message
     cryptoSignOpen(message, data, data.length, publicKey)
