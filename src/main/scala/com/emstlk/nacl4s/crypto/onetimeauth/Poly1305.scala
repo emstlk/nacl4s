@@ -12,7 +12,7 @@ object Poly1305 {
                          pad: Array[Int],
                          var leftover: Int,
                          buffer: Array[Byte],
-                         var fin: Byte)
+                         var fin: Int)
 
   def init(st: State, k: Array[Byte]) = {
     st.r(0) = loadInt(k, 0) & 0x3ffffff

@@ -1,6 +1,6 @@
-import sbt._
-import Keys._
 import pl.project13.scala.sbt.JmhPlugin
+import sbt.Keys._
+import sbt._
 import scoverage.ScoverageSbtPlugin.ScoverageKeys._
 
 object Build extends Build {
@@ -12,7 +12,7 @@ object Build extends Build {
       organization := "com.github.emstlk",
       version := "1.0.0-SNAPSHOT",
       scalaVersion := "2.11.6",
-      crossScalaVersions := Seq("2.10.5", "2.11.6"),
+      crossScalaVersions := Seq("2.10.5", scalaVersion.value),
       scalacOptions ++= Seq(
         "-encoding", "UTF-8",
         "-deprecation",

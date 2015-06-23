@@ -223,7 +223,7 @@ object Curve25519 {
       t(4) += t(3) >> 51
       t(3) &= 0x7ffffffffffffL
 
-      t(0) += 19 * (t(4) >> 51)
+      t(0) += (t(4) >> 51) * 19
       t(4) &= 0x7ffffffffffffL
     }
 
